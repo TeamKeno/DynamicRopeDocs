@@ -12,7 +12,9 @@
   --info: #4fc3ff;
   --warn: #ffb648;
   --radius: 12px;
-  --maxw: 1200px;
+  /* Shared by the header, hero, showcase, docs layout and footer, so widening
+     it moves all of them together and their left edges stay in line. */
+  --maxw: 1360px;
   --header-h: 60px;
   --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
@@ -21,6 +23,12 @@
 * { box-sizing: border-box; }
 
 html, body, #root { height: 100%; }
+
+/* Reserve the scrollbar's width whether or not one is showing. Doc pages differ
+   enough in length that some scroll and some do not, and every centred
+   container on the page — sidebar included — jumped sideways by half a
+   scrollbar as you moved between them. */
+html { scrollbar-gutter: stable; }
 
 body {
   margin: 0;
@@ -513,7 +521,20 @@ body.reel-active .site-footer { display: none; }
   height: calc(100vh - 60px);
   overflow-y: auto;
   padding: 32px 0;
+  /* Twenty entries overflow most laptop heights, so this scrollbar is on screen
+     almost always — left to the platform it renders as a bright bar down a very
+     dark page. Alpha rather than one of the palette colours, so it sits on
+     whatever is behind it and stays out of the way until reached for. */
+  scrollbar-width: thin;
+  scrollbar-color: rgba(230, 233, 240, 0.12) transparent;
 }
+.sidebar::-webkit-scrollbar { width: 8px; }
+.sidebar::-webkit-scrollbar-track { background: transparent; }
+.sidebar::-webkit-scrollbar-thumb {
+  background: rgba(230, 233, 240, 0.1);
+  border-radius: 999px;
+}
+.sidebar:hover::-webkit-scrollbar-thumb { background: rgba(230, 233, 240, 0.22); }
 .sidebar__group { margin-bottom: 26px; }
 .sidebar__group-title {
   font-size: 12px;
@@ -541,7 +562,16 @@ body.reel-active .site-footer { display: none; }
 .docs-main { min-width: 0; padding: 40px 0 80px; }
 
 /* ---------- Doc content ---------- */
-.doc { max-width: 760px; }
+/* One width for everything on the page — prose, tables, code alike. Letting the
+   wide elements break out past the prose made each page as wide as whatever it
+   happened to contain, so moving between a page of paragraphs and a page of
+   tables shifted the right edge by a couple of hundred pixels and read as a
+   different layout each time. A single measure costs the tables some room they
+   turn out not to need: the widest of them, the four-column one on Performance,
+   comes to about 740px once the name column is allowed to wrap. Anything that
+   ever does outgrow this still scrolls inside its own wrapper.
+   800px is roughly 98 characters at 16px — the top of the readable range. */
+.doc { max-width: 800px; }
 .doc__title { font-size: 38px; letter-spacing: -0.02em; margin: 0 0 24px; }
 .doc__body { font-size: 16px; }
 .doc__body h2 { font-size: 22px; margin: 36px 0 12px; letter-spacing: -0.01em; }
