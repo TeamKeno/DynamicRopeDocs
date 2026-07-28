@@ -8,7 +8,7 @@ export const PLUGIN = {
   platforms: 'Windows (Win64)',
   author: 'Team Keno',
   fabUrl: '#', // TODO: Fab listing URL
-  supportEmail: 'support@example.com', // TODO: replace with the real address
+  supportEmail: 'teamkeno0824@gmail.com',
 }
 
 // A placeholder address is worse than no address: it publishes a contact route
