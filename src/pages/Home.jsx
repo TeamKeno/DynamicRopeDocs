@@ -84,7 +84,7 @@ const SHOWCASE_PANELS = SHOWCASE.map((group) => {
 const PANELS = [
   { id: 'hero', title: 'DynamicRope', content: <Hero /> },
   ...SHOWCASE_PANELS,
-  { id: 'cta', title: 'Ready in minutes', content: <Cta /> },
+  { id: 'cta', title: 'Ready in Minutes', content: <Cta /> },
 ]
 
 // The same two calls to action the hero carries. Once the reader hauls past the
