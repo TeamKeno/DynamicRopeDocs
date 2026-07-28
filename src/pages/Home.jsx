@@ -1,7 +1,8 @@
 import { Link } from 'react-router-dom'
 import { PLUGIN } from '../data/nav.js'
-import { FEATURES } from '../data/features.js'
+import { FEATURES, SHOWCASE } from '../data/features.js'
 import RopeReel from '../components/RopeReel.jsx'
+import Showcase from '../components/Showcase.jsx'
 
 function Hero() {
   return (
@@ -61,9 +62,6 @@ function Cta() {
         <Link to="/docs/overview" className="btn btn--primary">
           Read the Docs
         </Link>
-        <Link to="/docs/resolve-modes" className="btn btn--ghost">
-          Wrap Modes
-        </Link>
       </div>
       <p className="cta__meta">
         Unreal Engine {PLUGIN.engineVersions.join(' / ')} · {PLUGIN.platforms} · by {PLUGIN.author}
@@ -72,10 +70,24 @@ function Cta() {
   )
 }
 
+// Showcase groups become panels of their own. `startIndex` keeps the left/right
+// alternation running across the panel break instead of restarting each time.
+let shown = 0
+const SHOWCASE_PANELS = SHOWCASE.map((group) => {
+  const startIndex = shown
+  shown += group.items.length
+  return {
+    id: group.id,
+    title: group.title,
+    content: <Showcase title={group.title} items={group.items} startIndex={startIndex} />,
+  }
+})
+
 // One panel per scroll gesture; the reel hauls between them on a rope.
 const PANELS = [
   { id: 'hero', title: 'DynamicRope', content: <Hero /> },
   { id: 'features', title: 'Everything in one component', content: <Features /> },
+  ...SHOWCASE_PANELS,
   { id: 'cta', title: 'Ready in minutes', content: <Cta /> },
 ]
 

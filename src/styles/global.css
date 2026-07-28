@@ -173,6 +173,124 @@ code {
 .feature-card__title { font-size: 18px; margin: 0 0 8px; }
 .feature-card__body { color: var(--text-dim); font-size: 14.5px; margin: 0; }
 
+/* ---------- Showcase (prose one side, clip the other) ---------- */
+.showcase { max-width: var(--maxw); margin: 0 auto; padding: 56px 24px; }
+.showcase__rows { display: flex; flex-direction: column; gap: 48px; }
+/* One block per feature: a text box and a clip box side by side, each centred
+   against the block's own height rather than against each other. No surface of
+   its own — the whitespace between blocks does the separating. */
+.showcase__row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+  grid-template-areas: 'text media';
+  gap: 36px;
+  align-items: center;
+}
+/* Named areas, not bare `grid-column`. With only a column pinned, the row is
+   left to auto-placement: the text is placed first (DOM order) into column 2 on
+   a flipped block, which parks the cursor there, and the media's request for
+   column 1 then falls to the *next* row under sparse packing. The two end up
+   stacked instead of side by side — text riding the top, clip pushed below. */
+.showcase__text { grid-area: text; align-self: center; }
+.showcase__media { grid-area: media; align-self: center; }
+
+/* Every other block swaps sides. Source order stays text-then-media so reading
+   order and tab order do not zigzag with the layout — the swap mirrors the area
+   list and the track list together, never `order`. `order` drives grid
+   auto-placement, so with an asymmetric track list it hands the media the
+   text's track and the placeholders come out different sizes on alternating
+   blocks. */
+.showcase__row--flip {
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+  grid-template-areas: 'media text';
+}
+
+.showcase__eyebrow {
+  display: block;
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.showcase__heading { font-size: 26px; letter-spacing: -0.015em; margin: 0 0 10px; }
+.showcase__body { color: var(--text-dim); font-size: 15px; margin: 0; }
+.showcase__points {
+  list-style: none;
+  margin: 14px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.showcase__points li {
+  position: relative;
+  padding-left: 18px;
+  color: var(--text-dim);
+  font-size: 13.5px;
+}
+.showcase__points li::before {
+  content: '';
+  position: absolute;
+  left: 2px;
+  top: 0.62em;
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--accent);
+}
+
+.showcase__text { min-width: 0; }
+.showcase__media { min-width: 0; display: flex; justify-content: center; }
+.showcase__frame {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+/* Striped so an empty slot reads as a reserved frame rather than a flat panel,
+   and so it is obvious at a glance which rows still need footage. */
+.showcase__frame--empty {
+  border-style: dashed;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 16px;
+  overflow: hidden;
+  text-align: center;
+  background-image: repeating-linear-gradient(
+    -45deg,
+    rgba(255, 122, 60, 0.05) 0 10px,
+    transparent 10px 20px
+  );
+}
+.showcase__frame-label {
+  color: var(--text-faint);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+/* Hints vary in length; clamping keeps one long shot note from making its
+   placeholder taller than the rest. */
+.showcase__frame-hint {
+  color: var(--text-faint);
+  font-size: 13px;
+  opacity: 0.8;
+  max-width: 30ch;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+}
+
 /* ---------- CTA ---------- */
 .cta {
   max-width: 720px;
@@ -308,6 +426,53 @@ body.reel-active .site-footer { display: none; }
 .reel:not(.reel--static) .feature-card__icon { font-size: 22px; margin-bottom: 8px; }
 .reel:not(.reel--static) .feature-card__title { font-size: 16px; }
 .reel:not(.reel--static) .feature-card__body { font-size: 13.5px; }
+
+/* The clip box is one fixed size, shared by every block on every showcase
+   panel: the panel's leftover height split two ways (each SHOWCASE group holds
+   two items), clamped by 42vw so a tall, narrow window cannot hand the whole
+   block to the clip. Height is derived first and width follows it, so the 16:9
+   stays exact under the clamp and no placeholder can be sized by the text
+   beside it. */
+.reel:not(.reel--static) .showcase {
+  padding: 0 24px;
+  --showcase-gap: 32px;
+  --showcase-h: calc(100dvh - var(--header-h) - 128px);
+  --showcase-row-h: calc((var(--showcase-h) - var(--showcase-gap)) / 2);
+  --showcase-media-h: min(var(--showcase-row-h), calc(42vw * 9 / 16));
+  --showcase-media-w: calc(var(--showcase-media-h) * 16 / 9);
+}
+.reel:not(.reel--static) .showcase .section-title { font-size: 26px; margin-bottom: 20px; }
+/* minmax(0, 1fr), not 1fr: a bare 1fr track keeps an automatic min-content
+   floor, so the row holding the longest paragraph quietly grows past its share
+   and its neighbour shrinks to compensate. A 0 floor makes the rows exactly
+   even and lets the text scroll-clip instead. */
+.reel:not(.reel--static) .showcase__rows {
+  display: grid;
+  grid-auto-rows: minmax(0, 1fr);
+  gap: var(--showcase-gap);
+  height: var(--showcase-h);
+}
+/* A definite track, not `auto`. An auto track has to measure its item to size
+   itself, and in that pass a percentage height resolves to auto — so a ratio
+   box collapses to whatever its contents happen to be wide. */
+.reel:not(.reel--static) .showcase__row {
+  grid-template-columns: minmax(0, 1fr) var(--showcase-media-w);
+  gap: 28px;
+  min-height: 0;
+}
+.reel:not(.reel--static) .showcase__row--flip {
+  grid-template-columns: var(--showcase-media-w) minmax(0, 1fr);
+}
+.reel:not(.reel--static) .showcase__media { align-items: center; min-height: 0; }
+.reel:not(.reel--static) .showcase__frame {
+  flex: none;
+  width: var(--showcase-media-w);
+  height: var(--showcase-media-h);
+}
+.reel:not(.reel--static) .showcase__text { min-height: 0; overflow: hidden; }
+.reel:not(.reel--static) .showcase__heading { font-size: 22px; margin-bottom: 8px; }
+.reel:not(.reel--static) .showcase__body { font-size: 14px; }
+.reel:not(.reel--static) .showcase__points { margin-top: 10px; }
 .reel:not(.reel--static) .cta { margin: 0 auto; }
 
 /* Fallback: ordinary scrolling page. */
@@ -491,6 +656,11 @@ body.reel-active .site-footer { display: none; }
   .hero { grid-template-columns: 1fr; padding-top: 48px; }
   .hero__title { font-size: 44px; }
   .features__grid { grid-template-columns: 1fr; }
+  /* Stacked: media under its text, and the flip has nothing left to flip. */
+  .showcase__row { grid-template-columns: 1fr; gap: 20px; }
+  .showcase__row--flip .showcase__text,
+  .showcase__row--flip .showcase__media { order: 0; }
+  .showcase__heading { font-size: 22px; }
   .docs-layout { grid-template-columns: 1fr; }
   .sidebar {
     position: static;
