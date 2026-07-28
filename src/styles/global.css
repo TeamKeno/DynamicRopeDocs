@@ -13,6 +13,7 @@
   --warn: #ffb648;
   --radius: 12px;
   --maxw: 1200px;
+  --header-h: 60px;
   --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
 }
@@ -180,6 +181,142 @@ code {
   text-align: center;
 }
 .cta__lead { color: var(--text-dim); font-size: 17px; margin: 0 0 28px; }
+.cta__actions { display: flex; gap: 12px; justify-content: center; }
+.cta__meta { color: var(--text-faint); font-size: 13px; margin: 28px 0 0; }
+
+/* ---------- Rope reel (landing) ----------
+   One scroll gesture = one panel, hauled in on the rope drawn down the left
+   rail. `.reel--static` is the fallback (small viewport / reduced motion):
+   plain document flow, no lock, no rope animation. */
+.reel {
+  position: relative;
+  height: calc(100dvh - var(--header-h));
+  overflow: hidden;
+}
+body.reel-active { overflow: hidden; }
+body.reel-active .site-footer { display: none; }
+
+.reel__stack { will-change: transform; }
+.reel__panel {
+  height: calc(100dvh - var(--header-h));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 24px 0 96px;
+}
+.reel__panel-inner { width: 100%; will-change: transform, opacity; }
+
+/* The rope rail */
+.reel__rail {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 120px;
+  pointer-events: none;
+  z-index: 3;
+}
+.reel__rope { display: block; overflow: visible; }
+.reel__rope-line {
+  fill: none;
+  stroke: #4a5468;
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+.reel__rope-taut {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 3.5;
+  stroke-linecap: round;
+  opacity: 0;
+  filter: drop-shadow(0 0 6px rgba(255, 122, 60, 0.65));
+}
+.reel__anchor { fill: var(--bg-elev-2); stroke: #4a5468; stroke-width: 2.5; }
+.reel__knot { fill: var(--accent); }
+.reel__knot-glow { fill: var(--accent); opacity: 0.18; filter: blur(9px); }
+
+/* Section dots */
+.reel__dots {
+  position: absolute;
+  right: 26px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  z-index: 4;
+}
+.reel__dot {
+  width: 11px;
+  height: 11px;
+  padding: 0;
+  border-radius: 999px;
+  border: 1.5px solid #4a5468;
+  background: transparent;
+  cursor: pointer;
+  position: relative;
+  transition: background 0.2s, border-color 0.2s, transform 0.2s;
+}
+.reel__dot:hover { border-color: var(--accent); transform: scale(1.2); }
+.reel__dot--on { background: var(--accent); border-color: var(--accent); }
+.reel__dot-label {
+  position: absolute;
+  right: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  white-space: nowrap;
+  font-size: 12px;
+  color: var(--text-dim);
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 3px 8px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s;
+}
+.reel__dot:hover .reel__dot-label { opacity: 1; }
+
+.reel__hint {
+  position: absolute;
+  left: 50%;
+  bottom: 26px;
+  transform: translateX(-50%);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  z-index: 4;
+  transition: opacity 0.4s;
+  animation: reel-bob 2.4s ease-in-out infinite;
+}
+.reel__hint--gone { opacity: 0; }
+@keyframes reel-bob {
+  0%, 100% { transform: translate(-50%, 0); }
+  50% { transform: translate(-50%, 6px); }
+}
+
+/* Panels have one viewport to work with, so the landing sections tighten up. */
+.reel:not(.reel--static) .hero { padding: 0 24px; gap: 40px; }
+.reel:not(.reel--static) .features { padding: 0 24px; }
+.reel:not(.reel--static) .features .section-title { margin-bottom: 24px; }
+.reel:not(.reel--static) .features__grid {
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  max-height: calc(100dvh - var(--header-h) - 140px);
+  overflow-y: auto;
+}
+.reel:not(.reel--static) .feature-card { padding: 18px; }
+.reel:not(.reel--static) .feature-card__icon { font-size: 22px; margin-bottom: 8px; }
+.reel:not(.reel--static) .feature-card__title { font-size: 16px; }
+.reel:not(.reel--static) .feature-card__body { font-size: 13.5px; }
+.reel:not(.reel--static) .cta { margin: 0 auto; }
+
+/* Fallback: ordinary scrolling page. */
+.reel--static { height: auto; overflow: visible; }
+.reel--static .reel__panel {
+  height: auto;
+  display: block;
+  padding: 56px 24px;
+}
 
 /* ---------- Docs layout ---------- */
 .docs-layout {
