@@ -14,7 +14,12 @@ export default function Header() {
           <NavLink to="/" end className="site-nav__link">
             Home
           </NavLink>
-          <NavLink to="/docs/overview" className="site-nav__link">
+          {/* The section root, not the first page in it. NavLink marks itself
+              active for its own path and anything under it, so pointing at
+              /docs/overview lit the link on that one page and left it dark on
+              every sibling. /docs covers the section, and the index route
+              redirects it to the overview so it still lands in the same place. */}
+          <NavLink to="/docs" className="site-nav__link">
             Docs
           </NavLink>
           <a className="site-nav__link" href={PLUGIN.fabUrl} target="_blank" rel="noreferrer">
