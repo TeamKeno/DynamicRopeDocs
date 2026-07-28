@@ -41,7 +41,7 @@
 export const SHOWCASE = [
   {
     id: 'throw-wrap',
-    title: 'Throw & wrap',
+    title: 'Throw & Wrap',
     items: [
       {
         id: 'core-loop',
@@ -67,7 +67,7 @@ export const SHOWCASE = [
   },
   {
     id: 'collide-hold',
-    title: 'Collide & hold',
+    title: 'Collide & Hold',
     items: [
       {
         id: 'collision',
@@ -100,7 +100,7 @@ export const SHOWCASE = [
   // something hidden underneath.
   {
     id: 'in-the-editor',
-    title: 'In the editor',
+    title: 'In The Editor',
     items: [
       {
         id: 'authoring',
@@ -126,7 +126,7 @@ export const SHOWCASE = [
   },
   {
     id: 'play-ship',
-    title: 'Play & ship',
+    title: 'Play & Ship',
     items: [
       {
         id: 'gameplay',

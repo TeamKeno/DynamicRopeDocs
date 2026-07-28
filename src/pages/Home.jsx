@@ -36,7 +36,7 @@ function Hero() {
 function Cta() {
   return (
     <div className="cta">
-      <h2 className="section-title">Ready in minutes</h2>
+      <h2 className="section-title">Ready in Minutes</h2>
       <p className="cta__lead">
         A component on the rope, one on what it grabs, then <code>Throw()</code> — a full throw → wrap →
         pull loop.
