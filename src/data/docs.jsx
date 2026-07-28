@@ -992,6 +992,80 @@ Rope.Ragdoll.Destroy   // destroy the target, to exercise the mid-wrap loss path
           than its own radius — that is what <strong>Min Bone Girth</strong> is for.
         </Callout>
 
+        <h2>Preview overlay</h2>
+        <p>
+          The viewport on the right of the panel shows the source mesh in its reference pose, and the{' '}
+          <strong>Preview Overlay</strong> section draws the baked volumes on top of it. These toggles are
+          panel-local: they never dirty the asset, and they are separate from the runtime{' '}
+          <code>URopeSDFProvider</code>’s own editor-only visualization. Until the asset has baked data the
+          whole section is greyed out.
+        </p>
+
+        <p>
+          The overlay draws a snapshot of the bone volumes rather than reading the asset live. Baking
+          updates that snapshot for you, so the result appears immediately; <strong>Refresh</strong> is
+          there for the times the asset changed from somewhere other than the Bake button.
+        </p>
+
+        <PropTable
+          columns={['Overlay', 'What it draws', 'What it is good for']}
+          rows={[
+            [
+              'Bounds (on by default)',
+              'Wireframe box of each baked volume’s bone-local bounds.',
+              'Coverage at a glance — which bones got baked at all, and whether Bounds Padding left enough margin beyond the skin.',
+            ],
+            [
+              'Voxels (narrow band)',
+              'Narrow-band samples as points, coloured by signed distance.',
+              'Confirming the band actually hugs the silhouette. Thin limbs are where it usually does not.',
+            ],
+            [
+              'Slice heatmap',
+              'A sampled plane cutting through each volume, same colour convention.',
+              'Reading the interior. Voxels only show the band; the slice shows the field as it passes through the body.',
+            ],
+            [
+              'Gradients',
+              'Green arrows along the outward distance gradient at narrow-band samples.',
+              'This is the normal the solver will query. Arrows that flip or scatter mean contact will push the rope the wrong way.',
+            ],
+          ]}
+        />
+
+        <p>
+          Voxels and the slice share one colour convention: <strong>red</strong> inside the surface
+          (negative), <strong>white</strong> at it (~0), <strong>blue</strong> outside (positive).
+        </p>
+
+        <Callout type="info" title="Reading the grey">
+          Samples clamped at the volume’s band limits carry no real distance, so the overlay refuses to
+          dress them up as data: voxels and gradients skip them, and the slice draws them in dim grey
+          instead of a heatmap colour. The boundary between grey and colour is therefore the contour of the
+          narrow band itself — a direct read on how far out the rope will start reacting.
+        </Callout>
+
+        <h3>Overlay parameters</h3>
+        <PropTable
+          columns={['Parameter', 'Default', 'Effect']}
+          rows={[
+            [
+              'Band Threshold (cm)',
+              '3',
+              'Display band for Voxels and Gradients — samples farther than this from the surface are not drawn. Capped at the asset’s baked Narrow Band, past which everything saturates and shows nothing.',
+            ],
+            ['Slice Axis', 'Z', 'Which axis the slice plane cuts along. X, Y or Z.'],
+            ['Slice Position (0–1)', '0.5', 'Where the plane sits along that axis.'],
+            ['Slice Resolution', '24', 'Samples per side of the slice grid. 2–128.'],
+            [
+              'Slice Color Scale (cm)',
+              '2.5',
+              'Distance at which the colour saturates. Lower it to bring out detail close to the surface.',
+            ],
+            ['Gradient Length (cm)', '4', 'Arrow length. Purely visual.'],
+          ]}
+        />
+
         <p>
           The SDF collider derives its surface velocity from the bone’s per-frame motion, so a swinging
           limb sweeps the rope aside — something the analytic capsule provider does not do.

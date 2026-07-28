@@ -530,6 +530,7 @@ body.reel-active .site-footer { display: none; }
 .doc__title { font-size: 38px; letter-spacing: -0.02em; margin: 0 0 24px; }
 .doc__body { font-size: 16px; }
 .doc__body h2 { font-size: 22px; margin: 36px 0 12px; letter-spacing: -0.01em; }
+.doc__body h3 { font-size: 17px; margin: 26px 0 10px; color: var(--text); }
 .doc__body p { color: #cdd3e0; }
 .doc__body ul, .doc__body ol { color: #cdd3e0; padding-left: 22px; }
 .doc__body li { margin: 6px 0; }
