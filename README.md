@@ -1,6 +1,6 @@
 # DynamicRope — Documentation Site
 
-Public documentation site for the **DynamicRope** Unreal Engine 5.7 plugin, intended to be linked
+Public documentation site for the **DynamicRope** Unreal Engine 5.5–5.8 plugin, intended to be linked
 from the Fab marketplace listing (`DocsURL`). Built with **Vite + React**.
 
 ## Develop
@@ -23,7 +23,7 @@ npm run preview
 src/
   App.jsx              # routes: / (landing) and /docs/* (docs layout)
   main.jsx             # HashRouter entry (static-host friendly)
-  components/          # Header, Sidebar, Footer, doc primitives (CodeBlock, Callout)
+  components/          # Header, Sidebar, Footer, doc primitives (CodeBlock, Callout, PropTable)
   pages/               # Home.jsx (landing), DocPage.jsx (renders a doc by slug)
   data/
     nav.js             # PLUGIN metadata + sidebar structure + page order
@@ -43,8 +43,8 @@ src/
 
 - [ ] Fill in `PLUGIN.fabUrl` and `PLUGIN.supportEmail` in `src/data/nav.js`.
 - [ ] Replace the hero visual placeholder in `src/pages/Home.jsx` with a gameplay clip / screenshot.
-- [ ] Verify exact public API signatures on the Components / Settings pages against the shipping headers.
 - [ ] Add real screenshots to the Quick Start and Concepts pages.
+- [ ] Re-check `PLUGIN.engineVersions` in `src/data/nav.js` against the versions actually shipped on Fab.
 - [ ] Set `base` in `vite.config.js` if deploying under a subpath (e.g. GitHub Pages).
 
 ## Deploy

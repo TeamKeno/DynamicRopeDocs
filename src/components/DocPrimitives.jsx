@@ -16,3 +16,30 @@ export function Callout({ type = 'info', title, children }) {
     </div>
   )
 }
+
+// Reference table for config struct fields / properties. `rows` is an array of
+// arrays matching `columns`; cells may be strings or JSX.
+export function PropTable({ columns = ['Property', 'Default', 'What it does'], rows }) {
+  return (
+    <div className="prop-table-wrap">
+      <table className="prop-table">
+        <thead>
+          <tr>
+            {columns.map((c) => (
+              <th key={c}>{c}</th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((row, i) => (
+            <tr key={i}>
+              {row.map((cell, j) => (
+                <td key={j}>{cell}</td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  )
+}
