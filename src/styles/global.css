@@ -116,7 +116,15 @@ code {
 .hero__title {
   font-size: 60px;
   line-height: 1.02;
-  margin: 0 0 12px;
+  /* Leading this tight puts the baseline close enough to the bottom of the line
+     box that descenders hang outside it — about 6px of the y and the p at this
+     size. Overflowing a box is normally harmless, but background-clip paints
+     only within it and the text itself is transparent, so the part that hangs
+     out is painted with nothing at all and reads as a clipped title. The
+     padding extends the painting area to cover the descent; the margin gives
+     back what it adds, leaving the spacing below unchanged. */
+  padding-bottom: 0.16em;
+  margin: 0 0 3px;
   letter-spacing: -0.03em;
   background: linear-gradient(120deg, #fff 20%, var(--accent) 120%);
   -webkit-background-clip: text;
