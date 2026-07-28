@@ -1,59 +1,19 @@
-// Landing-page feature cards. Pulled from the plugin's actual capabilities.
-// One line each — the card grid is for scanning, not for reading. Anything
-// that needs a paragraph belongs in SHOWCASE below, next to a clip.
+// Landing-page content. There was a grid of one-line feature cards above this
+// list; it was removed because the showcase says the same eight things better,
+// beside a clip, and reading both meant the same pitch twice. The two points
+// the cards had that the showcase did not — the GPU solver, and a wrap that
+// crosses actors — were folded in rather than dropped.
 //
-// House rule for both lists: say what the reader gets first, and let the
-// machinery follow as evidence. A term like XPBD earns its place by backing a
-// claim already made in plain words — it must never be the thing carrying the
-// meaning on its own, because a noun list tells a newcomer nothing. Keep the
-// terms, though: the buyer here is a UE developer, and they read XPBD or SDF as
-// proof there is something real underneath. Their full explanations live in
-// /docs, which is where a reader who wants them is heading anyway.
+// House rule: say what the reader gets first, and let the machinery follow as
+// evidence. A term like XPBD earns its place by backing a claim already made in
+// plain words — it must never be the thing carrying the meaning on its own,
+// because a noun list tells a newcomer nothing. Keep the terms, though: the
+// buyer here is a UE developer, and they read XPBD or SDF as proof there is
+// something real underneath. Their full explanations live in /docs, which is
+// where a reader who wants them is heading anyway.
 //
 // No performance figures. Nothing here has been measured, so "runs on the
 // graphics card, off your game thread" is as far as a speed claim may go.
-export const FEATURES = [
-  {
-    icon: '🪢',
-    title: 'Throw, Wrap & Hold',
-    body: 'One component on the rope, one on what it grabs. Throw() runs the rest.',
-  },
-  {
-    icon: '🎚️',
-    title: 'Three Wrap Modes',
-    body: 'Decide whether a throw can miss — full physics, assisted, or never fails.',
-  },
-  {
-    icon: '⚡',
-    title: 'Solved on the GPU',
-    body: 'Simulation runs on the graphics card, off your game thread. XPBD, CPU fallback.',
-  },
-  {
-    icon: '🦴',
-    title: 'Wraps Onto Anything',
-    body: 'Characters, props, moving platforms — and moving surfaces drag the rope along.',
-  },
-  {
-    icon: '🎯',
-    title: 'Cross-Actor Wrapping',
-    body: 'Pin a rope to a pillar and it still follows a bone on a running character.',
-  },
-  {
-    icon: '🎮',
-    title: 'Input to Ragdoll, Wired',
-    body: 'Bind throw and pull to keys, draw an aim reticle, let caught characters go limp.',
-  },
-  {
-    icon: '🪝',
-    title: 'A Line That Fights Back',
-    body: 'A real length both ends respect, and a number telling you how hard it pulls.',
-  },
-  {
-    icon: '🛠️',
-    title: 'See What It’s Doing',
-    body: 'An on-screen readout names each rope’s state; presets restamp a whole setup.',
-  },
-]
 
 /**
  * Full-width showcase blocks: prose on one side, a clip on the other, alternating.
@@ -114,8 +74,8 @@ export const SHOWCASE = [
         eyebrow: 'Collision',
         heading: 'It wraps onto whatever you throw it at',
         body:
-          'Characters, static props, elevators — the rope treats them all alike, and a moving surface drags it along. That is four collision techniques underneath, picked per rope; the simulation never knows the difference.',
-        points: ['Mix techniques on a single rope', 'Nothing tunnels through at speed'],
+          'Characters, static props, elevators — the rope treats them all alike, and a moving surface drags it along. It can even be owned by one actor and wrap a bone on another. Four collision techniques underneath, picked per rope.',
+        points: ['A single wrap can span several bones', 'Nothing tunnels through at speed'],
         media: null,
         mediaHint: 'Rope dragged across a moving platform and a bone capsule',
       },
@@ -131,13 +91,16 @@ export const SHOWCASE = [
       },
     ],
   },
-  // Baking sits here rather than with the runtime blocks: it is how the
-  // collision in the group above gets made, so it reads as the next step.
-  // A group of one is fine — rows are a fixed height, so this block matches
-  // every other block and simply centres in its panel.
+  // Grouped by where the reader is standing, not by how deep the machinery is.
+  // Baking and the debugger are both things you open the editor to do; the GPU
+  // path and the gameplay wiring are both things that happen while the game is
+  // running. An earlier cut paired the GPU solver with baking under "Under the
+  // hood" — they are not the same kind of thing, and the title described only
+  // one of them, since a bake panel is a tool in your hands rather than
+  // something hidden underneath.
   {
-    id: 'authoring',
-    title: 'Author your collision',
+    id: 'in-the-editor',
+    title: 'In the editor',
     items: [
       {
         id: 'authoring',
@@ -148,6 +111,16 @@ export const SHOWCASE = [
         points: ['One button, with progress you can cancel', 'The asset remembers your last settings'],
         media: null,
         mediaHint: 'Editor: nudge voxel size, hit Bake, preview sharpens',
+      },
+      {
+        id: 'debugging',
+        eyebrow: 'Debugging',
+        heading: 'See why it did that',
+        body:
+          'When a rope does something you did not expect, an on-screen readout names the state it is in and how it is being solved. Presets restamp an entire rope setup onto another in one click.',
+        points: ['Presets restamp a whole rope at once', 'The debugger names how each rope solves'],
+        media: null,
+        mediaHint: 'Gameplay Debugger overlay during a live throw',
       },
     ],
   },
@@ -166,14 +139,14 @@ export const SHOWCASE = [
         mediaHint: 'Full input loop from a player camera, HUD visible',
       },
       {
-        id: 'debugging',
-        eyebrow: 'Debugging',
-        heading: 'See why it did that',
+        id: 'gpu',
+        eyebrow: 'Performance',
+        heading: 'The whole simulation runs on the GPU',
         body:
-          'When a rope does something you did not expect, an on-screen readout names the state it is in and how it is being solved. Presets restamp an entire rope setup onto another in one click.',
-        points: ['Presets restamp a whole rope at once', 'The debugger names how each rope solves'],
+          'Solving, contact detection and tube building all happen on the graphics card, and the rope state stays there between frames — so your ropes are not spending game-thread time. Cooking, servers and -nullrhi fall back to CPU on their own.',
+        points: ['XPBD solver and tube builder on RDG compute', 'The fallback needs no configuration'],
         media: null,
-        mediaHint: 'Gameplay Debugger overlay during a live throw',
+        mediaHint: 'A crowd of ropes running at once',
       },
     ],
   },

@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import { PLUGIN } from '../data/nav.js'
-import { FEATURES, SHOWCASE } from '../data/features.js'
+import { SHOWCASE } from '../data/features.js'
 import RopeReel from '../components/RopeReel.jsx'
 import Showcase from '../components/Showcase.jsx'
 
@@ -28,25 +28,6 @@ function Hero() {
       <div className="hero__visual" aria-hidden>
         {/* TODO: replace with a looping gameplay clip or hero screenshot */}
         <div className="hero__visual-placeholder">Gameplay clip / screenshot</div>
-      </div>
-    </div>
-  )
-}
-
-function Features() {
-  return (
-    <div className="features">
-      <h2 className="section-title">Everything in one component</h2>
-      <div className="features__grid" data-reel-scroll>
-        {FEATURES.map((f) => (
-          <article key={f.title} className="feature-card">
-            <div className="feature-card__icon" aria-hidden>
-              {f.icon}
-            </div>
-            <h3 className="feature-card__title">{f.title}</h3>
-            <p className="feature-card__body">{f.body}</p>
-          </article>
-        ))}
       </div>
     </div>
   )
@@ -87,7 +68,6 @@ const SHOWCASE_PANELS = SHOWCASE.map((group) => {
 // One panel per scroll gesture; the reel hauls between them on a rope.
 const PANELS = [
   { id: 'hero', title: 'DynamicRope', content: <Hero /> },
-  { id: 'features', title: 'Everything in one component', content: <Features /> },
   ...SHOWCASE_PANELS,
   { id: 'cta', title: 'Ready in minutes', content: <Cta /> },
 ]

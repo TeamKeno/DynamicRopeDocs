@@ -148,30 +148,13 @@ code {
 .btn--ghost { border-color: var(--border); color: var(--text); }
 .btn--ghost:hover { background: var(--bg-elev); }
 
-/* ---------- Features ---------- */
+/* ---------- Shared section heading ---------- */
 .section-title {
   text-align: center;
   font-size: 32px;
   letter-spacing: -0.02em;
   margin: 0 0 36px;
 }
-.features { max-width: var(--maxw); margin: 0 auto; padding: 56px 24px; }
-.features__grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 18px;
-}
-.feature-card {
-  background: var(--bg-elev);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 24px;
-  transition: border-color 0.15s, transform 0.15s;
-}
-.feature-card:hover { border-color: #384155; transform: translateY(-2px); }
-.feature-card__icon { font-size: 26px; margin-bottom: 12px; }
-.feature-card__title { font-size: 18px; margin: 0 0 8px; }
-.feature-card__body { color: var(--text-dim); font-size: 14.5px; margin: 0; }
 
 /* ---------- Showcase (prose one side, clip the other) ---------- */
 .showcase { max-width: var(--maxw); margin: 0 auto; padding: 56px 24px; }
@@ -414,18 +397,6 @@ body.reel-active .site-footer { display: none; }
 
 /* Panels have one viewport to work with, so the landing sections tighten up. */
 .reel:not(.reel--static) .hero { padding: 0 24px; gap: 40px; }
-.reel:not(.reel--static) .features { padding: 0 24px; }
-.reel:not(.reel--static) .features .section-title { margin-bottom: 24px; }
-.reel:not(.reel--static) .features__grid {
-  grid-template-columns: repeat(4, 1fr);
-  gap: 14px;
-  max-height: calc(100dvh - var(--header-h) - 140px);
-  overflow-y: auto;
-}
-.reel:not(.reel--static) .feature-card { padding: 18px; }
-.reel:not(.reel--static) .feature-card__icon { font-size: 22px; margin-bottom: 8px; }
-.reel:not(.reel--static) .feature-card__title { font-size: 16px; }
-.reel:not(.reel--static) .feature-card__body { font-size: 13.5px; }
 
 /* The clip box is one fixed size, shared by every block on every showcase
    panel: the panel's leftover height split two ways (each SHOWCASE group holds
@@ -659,7 +630,6 @@ body.reel-active .site-footer { display: none; }
 @media (max-width: 900px) {
   .hero { grid-template-columns: 1fr; padding-top: 48px; }
   .hero__title { font-size: 44px; }
-  .features__grid { grid-template-columns: 1fr; }
   /* Stacked: media under its text, and the flip has nothing left to flip. */
   .showcase__row { grid-template-columns: 1fr; gap: 20px; }
   .showcase__row--flip .showcase__text,
