@@ -442,15 +442,19 @@ body.reel-active .site-footer { display: none; }
   --showcase-media-w: calc(var(--showcase-media-h) * 16 / 9);
 }
 .reel:not(.reel--static) .showcase .section-title { font-size: 26px; margin-bottom: 20px; }
-/* minmax(0, 1fr), not 1fr: a bare 1fr track keeps an automatic min-content
-   floor, so the row holding the longest paragraph quietly grows past its share
-   and its neighbour shrinks to compensate. A 0 floor makes the rows exactly
-   even and lets the text scroll-clip instead. */
+/* A stated row height rather than a fraction of the container. Fractions would
+   tie a block's size to how many blocks its group happens to hold — a group of
+   one would stretch to the whole panel and its clip would tower over the rest.
+   A fixed height means every block on every panel is identical and a short
+   group simply centres, leaving room above and below.
+
+   It is a *fixed* height, not a minimum, for the same reason it was never a
+   bare 1fr: a content floor lets the block holding the longest paragraph grow
+   past its share. Overflow is clipped instead (see .showcase__text). */
 .reel:not(.reel--static) .showcase__rows {
   display: grid;
-  grid-auto-rows: minmax(0, 1fr);
+  grid-auto-rows: var(--showcase-row-h);
   gap: var(--showcase-gap);
-  height: var(--showcase-h);
 }
 /* A definite track, not `auto`. An auto track has to measure its item to size
    itself, and in that pass a percentage height resolves to auto — so a ratio
