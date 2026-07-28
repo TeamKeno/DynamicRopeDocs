@@ -9,6 +9,13 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react
  * Falls back to ordinary document flow when the viewport is small or the user
  * asked for reduced motion — the reel is presentation, never the only way to
  * reach the content.
+ *
+ * `quickActions` is an optional node pinned to the top-right corner of the
+ * reel, revealed once the reader leaves the first panel. The opening panel is
+ * expected to carry its own calls to action, so showing these on top of it
+ * would only double them up; from the second panel on there is nothing else
+ * offering a way out. The static fallback does not render them — that path
+ * scrolls normally under the site header, which carries the same links.
  */
 
 const HAUL_MS = 900 // one haul, start to settle
@@ -40,7 +47,7 @@ function ropePoint(p, sag, h) {
   }
 }
 
-export default function RopeReel({ panels, label = 'Highlights' }) {
+export default function RopeReel({ panels, label = 'Highlights', quickActions = null }) {
   const rootRef = useRef(null)
   const stackRef = useRef(null)
   const panelRefs = useRef([])
@@ -48,6 +55,7 @@ export default function RopeReel({ panels, label = 'Highlights' }) {
   const tautRef = useRef(null)
   const beadRef = useRef(null)
   const glowRef = useRef(null)
+  const quickRef = useRef(null)
 
   const [index, setIndex] = useState(0)
   const [enabled, setEnabled] = useState(false)
@@ -175,6 +183,15 @@ export default function RopeReel({ panels, label = 'Highlights' }) {
   )
 
   useEffect(() => () => cancelAnimationFrame(rafRef.current), [])
+
+  // The quick actions stay mounted so they can fade, which means fading them
+  // out is not enough: a transparent link is still tabbable and still read
+  // aloud. `inert` takes the whole subtree out of both. It is set imperatively
+  // because React 18 does not forward the attribute.
+  useEffect(() => {
+    const el = quickRef.current
+    if (el) el.inert = index === 0
+  }, [index])
 
   // --- input ---------------------------------------------------------------
   useEffect(() => {
@@ -315,6 +332,16 @@ export default function RopeReel({ panels, label = 'Highlights' }) {
           </button>
         ))}
       </nav>
+
+      {quickActions ? (
+        <nav
+          className={`reel__quick${index > 0 ? ' reel__quick--on' : ''}`}
+          aria-label="Quick links"
+          ref={quickRef}
+        >
+          {quickActions}
+        </nav>
+      ) : null}
 
       <div className={`reel__hint${index === 0 ? '' : ' reel__hint--gone'}`} aria-hidden>
         Scroll to haul

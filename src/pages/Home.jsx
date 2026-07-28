@@ -72,10 +72,29 @@ const PANELS = [
   { id: 'cta', title: 'Ready in minutes', content: <Cta /> },
 ]
 
+// The same two calls to action the hero carries. Once the reader hauls past the
+// hero those scroll away with it, and every panel after is a feature with no
+// way out of it — so the reel re-offers them in the corner.
+const QUICK_ACTIONS = (
+  <>
+    <Link to="/docs/quick-start" className="btn btn--primary btn--sm">
+      Quick Start
+    </Link>
+    <a
+      href={PLUGIN.fabUrl}
+      className="btn btn--ghost btn--sm"
+      target="_blank"
+      rel="noreferrer"
+    >
+      Get on Fab
+    </a>
+  </>
+)
+
 export default function Home() {
   return (
     <div className="home">
-      <RopeReel panels={PANELS} label="DynamicRope highlights" />
+      <RopeReel panels={PANELS} label="DynamicRope highlights" quickActions={QUICK_ACTIONS} />
     </div>
   )
 }

@@ -147,6 +147,7 @@ code {
 .btn--primary:hover { background: #ff8f5c; }
 .btn--ghost { border-color: var(--border); color: var(--text); }
 .btn--ghost:hover { background: var(--bg-elev); }
+.btn--sm { padding: 7px 14px; font-size: 13.5px; border-radius: 8px; }
 
 /* ---------- Shared section heading ---------- */
 .section-title {
@@ -375,6 +376,28 @@ body.reel-active .site-footer { display: none; }
   transition: opacity 0.15s;
 }
 .reel__dot:hover .reel__dot-label { opacity: 1; }
+
+/* Quick actions, pinned to the reel rather than to a panel, so they hold still
+   while the stack hauls past underneath. Hidden on the opening panel, which
+   carries these same two links inline. The dots sit at right: 26px on the
+   vertical centre, so the two never meet. */
+.reel__quick {
+  position: absolute;
+  top: 20px;
+  right: 26px;
+  display: flex;
+  gap: 10px;
+  z-index: 5;
+  opacity: 0;
+  transform: translateY(-10px);
+  pointer-events: none;
+  transition: opacity 0.35s, transform 0.35s;
+}
+.reel__quick--on { opacity: 1; transform: none; pointer-events: auto; }
+/* The ghost button is transparent by default; over a panel it needs a surface
+   of its own to stay legible against whatever the clip behind it is doing. */
+.reel__quick .btn--ghost { background: rgba(18, 21, 29, 0.82); backdrop-filter: blur(8px); }
+.reel__quick .btn--ghost:hover { background: var(--bg-elev-2); }
 
 .reel__hint {
   position: absolute;
