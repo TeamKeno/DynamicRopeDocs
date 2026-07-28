@@ -626,7 +626,17 @@ body.reel-active .site-footer { display: none; }
   vertical-align: top;
 }
 .prop-table tr:last-child td { border-bottom: none; }
-.prop-table td:first-child { white-space: nowrap; color: var(--text); }
+/* The name column wraps; the names inside it do not. Holding the whole cell on
+   one line meant a row listing several functions claimed the width of all of
+   them, and since a table's first column takes what it demands before the rest
+   divide the remainder, the notes beside it were squeezed to a few characters.
+   Breaking is allowed between names and forbidden inside one, so an identifier
+   is never split down the middle. */
+.prop-table td:first-child { color: var(--text); }
+.prop-table td:first-child code { white-space: nowrap; }
+/* And the notes keep a floor of their own — past it the wrapper scrolls
+   sideways rather than letting the column collapse. */
+.prop-table td:not(:first-child) { min-width: 200px; }
 .prop-table code { font-size: 12.5px; }
 
 /* ---------- Doc pager ---------- */

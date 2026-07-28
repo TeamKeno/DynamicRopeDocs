@@ -3,7 +3,7 @@
 // headers (URopeComponent, URopeWielderComponent, the Core/ config structs).
 // Still to replace before publishing: screenshots, video links, the Fab URL
 // and the support address in nav.js.
-import { CodeBlock, Callout, PropTable } from '../components/DocPrimitives.jsx'
+import { CodeBlock, Callout, PropTable, Names } from '../components/DocPrimitives.jsx'
 import { Link } from 'react-router-dom'
 import { PLUGIN, hasSupportEmail } from './nav.js'
 
@@ -1390,7 +1390,7 @@ Rope->GetSolverLODScale();`}
             [<code key="d">UAnimNotifyState_RopePull</code>, 'An animation-scoped pull window.'],
             [<code key="e">URopeAimWidget</code>, 'Aim crosshair and wrappable-bone highlight ring. Restyle by subclassing in a WBP.'],
             [<code key="f">URopePullGaugeWidget</code>, 'Pull arming/engagement ring.'],
-            [<code key="g">URopePluginInfoHUD / URopePluginInfoWidget</code>, 'In-game key guide, capabilities and limitations panels for demo levels.'],
+            [<Names key="g">URopePluginInfoHUD / URopePluginInfoWidget</Names>, 'In-game key guide, capabilities and limitations panels for demo levels.'],
           ]}
         />
 
@@ -1590,9 +1590,9 @@ Rope->GetSolverLODScale();`}
             [<code key="d">Release Wrap</code>, 'Manual release.'],
             [<code key="e">Cut Rope</code>, 'Same flow, reported as ERopeReleaseReason::Cut so the game can react differently.'],
             [<code key="f">Set Active Pull</code>, 'Constant pull force while taut; 0 stops. bIgnoreTautGate bypasses the gate for this call.'],
-            [<code key="g">Set Rope Length / Set Reel Rate</code>, 'Immediate and held-input reeling.'],
+            [<Names key="g">Set Rope Length / Set Reel Rate</Names>, 'Immediate and held-input reeling.'],
             [<code key="h">Apply Preset</code>, 'Returns false outside Free/Loaded.'],
-            [<code key="i">Set / Toggle Show Rope When Loaded</code>, 'Guaranteed-mode presentation switch.'],
+            [<Names key="i">Set / Toggle Show Rope When Loaded</Names>, 'Guaranteed-mode presentation switch.'],
           ]}
         />
 
@@ -1602,16 +1602,16 @@ Rope->GetSolverLODScale();`}
           rows={[
             [<code key="a">Get Phase</code>, 'ERopePhase'],
             [<code key="b">Can Throw Now</code>, 'Whether the mode × phase gate allows a throw right now.'],
-            [<code key="c">Get Wrapped Bone Name / Get Wrapped Mesh</code>, 'The current wrap target.'],
+            [<Names key="c">Get Wrapped Bone Name / Get Wrapped Mesh</Names>, 'The current wrap target.'],
             [<code key="d">Get Constraint Tension</code>, 'The authoritative gameplay load. (Get Tether Tension is the legacy alias.)'],
             [<code key="e">Get Pull Sample</code>, 'Pull direction + tension this frame.'],
-            [<code key="f">Is Pull Taut / Is Chain Taut</code>, 'Taut gates.'],
+            [<Names key="f">Is Pull Taut / Is Chain Taut</Names>, 'Taut gates.'],
             [<code key="g">Get Tether Overshoot</code>, 'cm past the available rope length.'],
             [<code key="h">Get Effective Tether Target Share</code>, '[0..1] — how the correction split between target and wielder.'],
-            [<code key="i">Get Node Count / Get Node Position</code>, 'Centerline access, for attaching effects.'],
+            [<Names key="i">Get Node Count / Get Node Position</Names>, 'Centerline access, for attaching effects.'],
             [<code key="j">Get Current Rope Length</code>, 'Runtime length in cm.'],
-            [<code key="k">Get Segment Tension / Get Max Tension</code>, 'Visual solver diagnostics — not gameplay load.'],
-            [<code key="l">Is Sleeping / Get Solver LOD Scale</code>, 'Scaling state.'],
+            [<Names key="k">Get Segment Tension / Get Max Tension</Names>, 'Visual solver diagnostics — not gameplay load.'],
+            [<Names key="l">Is Sleeping / Get Solver LOD Scale</Names>, 'Scaling state.'],
             [<code key="m">Constrain Wielder Location</code>, 'Project a proposed move into the hard length boundary.'],
           ]}
         />
@@ -1620,15 +1620,15 @@ Rope->GetSolverLODScale();`}
         <PropTable
           columns={['Node', 'Notes']}
           rows={[
-            [<code key="a">Throw / Throw Now / Throw In Direction</code>, 'Throw with the montage, immediately, or toward an explicit direction.'],
+            [<Names key="a">Throw / Throw Now / Throw In Direction</Names>, 'Throw with the montage, immediately, or toward an explicit direction.'],
             [<code key="b">Toggle Throw</code>, 'What the throw input does when Throw Toggles Hold is on (the default).'],
-            [<code key="c">Start Pull / Stop Pull</code>, 'Arm and disarm. Engagement waits for Pull Engage Tension.'],
-            [<code key="d">Start Pull Now / Stop Pull Now</code>, 'Skip the arming stage.'],
-            [<code key="e">Start Reel In / Start Reel Out / Stop Reel</code>, 'Held-input reeling at the rope’s Reel Speed.'],
-            [<code key="f">Release / Cut</code>, 'Forwarded to the rope.'],
-            [<code key="g">Play Throw Montage / Play Pull Montage</code>, 'Manual montage triggers.'],
+            [<Names key="c">Start Pull / Stop Pull</Names>, 'Arm and disarm. Engagement waits for Pull Engage Tension.'],
+            [<Names key="d">Start Pull Now / Stop Pull Now</Names>, 'Skip the arming stage.'],
+            [<Names key="e">Start Reel In / Start Reel Out / Stop Reel</Names>, 'Held-input reeling at the rope’s Reel Speed.'],
+            [<Names key="f">Release / Cut</Names>, 'Forwarded to the rope.'],
+            [<Names key="g">Play Throw Montage / Play Pull Montage</Names>, 'Manual montage triggers.'],
             [<code key="h">Build Throw Context</code>, 'Blueprint-overridable context construction from an aim direction.'],
-            [<code key="i">Uses Aim Ray / Is Aim Active / Uses Locked Preview / Is Pull Armed / Is Pull Engaged / Get Pull Engage Progress</code>, 'State queries for UI.'],
+            [<Names key="i">Uses Aim Ray / Is Aim Active / Uses Locked Preview / Is Pull Armed / Is Pull Engaged / Get Pull Engage Progress</Names>, 'State queries for UI.'],
           ]}
         />
 
@@ -1706,7 +1706,7 @@ Rope->GetSolverLODScale();`}
             [<code key="b">GetLoadedTipTransform()</code>, 'Twice per frame while Loaded', 'Where the tip sits in hand. Cache anything expensive — this is not a per-transition hook.'],
             [<code key="c">OnEnterLoaded()</code>, 'On the Loaded entry edge', 'Default toggles tube visibility from bShowRopeWhenLoaded.'],
             [<code key="d">OnDeployFromLoaded()</code>, 'Leaving Loaded', 'Default restores the tube and full length. GetPhase() is still Loaded when it runs.'],
-            [<code key="e">NotifyCaptured / NotifyWrapped / NotifyReleased / NotifyPresetApplied</code>, 'Before each broadcast', 'Native equivalents of the dynamic delegates, so a C++ subclass need not bind to its own events.'],
+            [<Names key="e">NotifyCaptured / NotifyWrapped / NotifyReleased / NotifyPresetApplied</Names>, 'Before each broadcast', 'Native equivalents of the dynamic delegates, so a C++ subclass need not bind to its own events.'],
           ]}
         />
 
