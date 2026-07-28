@@ -38,16 +38,31 @@ function Cta() {
     <div className="cta">
       <h2 className="section-title">Ready in minutes</h2>
       <p className="cta__lead">
-        Add a component, call <code>Throw()</code>, and you have a full throw → wrap → pull loop.
+        A component on the rope, one on what it grabs, then <code>Throw()</code> — a full throw → wrap →
+        pull loop.
       </p>
       <div className="cta__actions">
         <Link to="/docs/overview" className="btn btn--primary">
           Read the Docs
         </Link>
       </div>
-      <p className="cta__meta">
-        Unreal Engine {PLUGIN.engineVersions.join(' / ')} · {PLUGIN.platforms} · by {PLUGIN.author}
-      </p>
+      {/* The last thing a buyer checks before clicking, so it goes next to the
+          button rather than in a page they would have to go looking for. The
+          network row costs us the sale of anyone who needs multiplayer, which
+          is the point: finding out afterwards costs a refund and a review. */}
+      <dl className="cta__spec">
+        <dt>Engine</dt>
+        <dd>Unreal Engine {PLUGIN.engineVersions.join(' / ')}</dd>
+        <dt>Platform</dt>
+        <dd>{PLUGIN.platforms} — tested</dd>
+        <dt>Scripting</dt>
+        <dd>Blueprint or C++</dd>
+        <dt>Network</dt>
+        <dd>Single-player — no replication</dd>
+        <dt>Included</dt>
+        <dd>Demo map, stress-test map, 13 sample Blueprints</dd>
+      </dl>
+      <p className="cta__meta">by {PLUGIN.author}</p>
     </div>
   )
 }

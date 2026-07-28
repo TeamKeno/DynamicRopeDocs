@@ -284,7 +284,22 @@ code {
 }
 .cta__lead { color: var(--text-dim); font-size: 17px; margin: 0 0 28px; }
 .cta__actions { display: flex; gap: 12px; justify-content: center; }
-.cta__meta { color: var(--text-faint); font-size: 13px; margin: 28px 0 0; }
+/* Label/value pairs on one grid so the values line up into a column that can be
+   read straight down. Centred text would turn it back into prose. */
+.cta__spec {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 8px 20px;
+  max-width: 460px;
+  margin: 28px auto 0;
+  padding-top: 22px;
+  border-top: 1px solid var(--border);
+  text-align: left;
+  font-size: 14px;
+}
+.cta__spec dt { color: var(--text-faint); }
+.cta__spec dd { color: var(--text-dim); margin: 0; }
+.cta__meta { color: var(--text-faint); font-size: 13px; margin: 20px 0 0; }
 
 /* ---------- Rope reel (landing) ----------
    One scroll gesture = one panel, hauled in on the rope drawn down the left

@@ -8,8 +8,14 @@ export const PLUGIN = {
   platforms: 'Windows (Win64)',
   author: 'Team Keno',
   fabUrl: '#', // TODO: Fab listing URL
-  supportEmail: 'support@example.com', // TODO
+  supportEmail: 'support@example.com', // TODO: replace with the real address
 }
+
+// A placeholder address is worse than no address: it publishes a contact route
+// that silently goes nowhere. Anything still pointing at example.com counts as
+// unset, and the support section and footer link stay hidden until it is real.
+export const hasSupportEmail = () =>
+  Boolean(PLUGIN.supportEmail) && !PLUGIN.supportEmail.includes('example.com')
 
 // Sidebar structure for the /docs section. Each `slug` maps to a doc page.
 export const DOC_NAV = [
@@ -17,6 +23,7 @@ export const DOC_NAV = [
     group: 'Getting Started',
     items: [
       { slug: 'overview', title: 'Overview' },
+      { slug: 'requirements', title: 'Requirements & Compatibility' },
       { slug: 'installation', title: 'Installation' },
       { slug: 'quick-start', title: 'Quick Start' },
     ],
@@ -29,6 +36,7 @@ export const DOC_NAV = [
       { slug: 'collision', title: 'Collision & Wrapping' },
       { slug: 'hold-pull', title: 'Hold, Pull & Tether' },
       { slug: 'gpu-solver', title: 'GPU Solver' },
+      { slug: 'performance', title: 'Performance & Budgeting' },
     ],
   },
   {

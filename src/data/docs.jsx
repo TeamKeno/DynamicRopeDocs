@@ -5,7 +5,7 @@
 // and the support address in nav.js.
 import { CodeBlock, Callout, PropTable } from '../components/DocPrimitives.jsx'
 import { Link } from 'react-router-dom'
-import { PLUGIN } from './nav.js'
+import { PLUGIN, hasSupportEmail } from './nav.js'
 
 export const DOCS = {
   overview: {
@@ -72,6 +72,93 @@ export const DOCS = {
             tooling and detail customizations.
           </li>
         </ul>
+      </>
+    ),
+  },
+
+  requirements: {
+    title: 'Requirements & Compatibility',
+    body: (
+      <>
+        <p>
+          Everything on this page is what you would want to know before buying rather than after. Where
+          something is not supported it says so plainly.
+        </p>
+
+        <h2>Engine</h2>
+        <p>
+          Unreal Engine {PLUGIN.engineVersions.join(', ')} — built and tested on all four, not only the
+          newest.
+        </p>
+
+        <h2>Platform</h2>
+        <p>
+          Developed and tested on <strong>{PLUGIN.platforms}</strong>. Worth separating two things that
+          often get conflated: nothing in the plugin is gated to Windows — there is no platform allow
+          list on the modules, and the GPU path is ordinary RDG compute with a CPU fallback behind it —
+          but Windows is the only platform it has actually been run on. Treat anything else as
+          unverified rather than as excluded.
+        </p>
+
+        <h2>Blueprint or C++</h2>
+        <p>
+          A rope can be built, thrown, tuned and reacted to entirely from Blueprint. The rope component
+          exposes 33 callable functions and five assignable events, the wielder another 29, and the
+          ragdoll response component five more — the throw, the wrap, the tension readout, pull, reel and
+          release are all on that surface. See{' '}
+          <Link to="/docs/blueprint-api">Blueprint API &amp; Events</Link>.
+        </p>
+        <p>
+          C++ is for extending rather than for using: a new collider source, a new collider provider, or
+          hooking the solver directly. That is covered in{' '}
+          <Link to="/docs/extending">Extending in C++</Link>.
+        </p>
+
+        <h2>Multiplayer</h2>
+        <Callout type="warn" title="Single-player only">
+          The plugin does not replicate. Rope and wrap state are local to the machine simulating them,
+          and on a replicated pawn the wielder deliberately does nothing for simulated proxies rather
+          than fighting network smoothing with a locally guessed rope. A remote client will not see a
+          correct rope. Plan for single-player, or for a mode where only the local player throws and
+          others never need to see it accurately.
+        </Callout>
+
+        <h2>What’s included</h2>
+        <PropTable
+          columns={['Content', 'What it is']}
+          rows={[
+            ['Demo map', 'A playable level wiring the whole loop to input — throw, wrap, pull, release.'],
+            [
+              'Stress-test map',
+              'A second level for putting many ropes on screen at once. This is the one to measure with — see Performance & Budgeting.',
+            ],
+            [
+              '13 sample Blueprints',
+              'Rope, snare, lever, pressure plate, elevator, movable target, crate, door, helicopter, basket goal and an AI character — worked examples rather than a single showcase actor.',
+            ],
+            ['A baked SDF asset', 'The third-person mannequin, already baked, so the SDF path runs without authoring anything first.'],
+            ['Third-person template + throw / pull animations', 'A character to throw from on the first launch.'],
+          ]}
+        />
+
+        <h2>Automation tests</h2>
+        <p>
+          The plugin ships its C++ automation tests rather than stripping them — solver, wrap
+          controller, SDF sampler, GPU solver, length constraint, traction, wielder lifecycle and
+          presets. You can run them against your own engine build to check the plugin before trusting
+          it. See <Link to="/docs/debugging">Debugging &amp; Profiling</Link>.
+        </p>
+
+        {hasSupportEmail() ? (
+          <>
+            <h2>Support</h2>
+            <p>
+              Questions, bugs and feature requests: <a href={`mailto:${PLUGIN.supportEmail}`}>{PLUGIN.supportEmail}</a>.
+              A repro — the wrap mode, the phase the rope was in, and what the Gameplay Debugger showed —
+              turns most reports around much faster.
+            </p>
+          </>
+        ) : null}
       </>
     ),
   },
@@ -750,6 +837,109 @@ Rope->HadLogicOverrideThisFrame();  // a logic phase produced node overrides
           <code>LODMinIterationScale</code>. <code>GetSolverLODScale()</code> and <code>IsSleeping()</code>{' '}
           expose the current state.
         </p>
+      </>
+    ),
+  },
+
+  performance: {
+    title: 'Performance & Budgeting',
+    body: (
+      <>
+        <p>
+          This page is about where a rope’s cost goes, which dials move it, and how to measure your own
+          numbers. It deliberately does not quote frame times: the answer depends on your hardware, your
+          node counts and how many ropes are awake, and a figure measured on someone else’s machine
+          would not be a budget you could plan against.
+        </p>
+
+        <h2>Where the time goes</h2>
+        <p>
+          In normal play the whole simulation is on the GPU — solve, contact detection and tube building
+          — and the rope state stays resident there between frames rather than being uploaded each time.
+          The CPU side per rope is the orchestration: gathering colliders once per frame for every rope,
+          and the post-wrap logic, which is deliberately data and constraints rather than a solve. A
+          wrapped rope following animation is the cheap case by design.
+        </p>
+
+        <h2>When it falls back to the CPU</h2>
+        <p>
+          The fallback is automatic and needs no configuration, but a rope on it costs very differently
+          from one on the GPU — so the useful thing is knowing you are on it.
+        </p>
+        <PropTable
+          columns={['Condition', 'What falls back']}
+          rows={[
+            ['No renderable RHI — cook, -nullrhi, dedicated server', 'Everything. The CPU solver and CPU tube builder take over.'],
+            [
+              'Tube over 512 rings',
+              'The tube only. That is roughly 170 nodes at a subdivision of 3 — a limit of the shader’s ring budget, so a very long or very finely subdivided rope hits it.',
+            ],
+          ]}
+        />
+        <p>
+          Do not guess at which path a rope took. The <strong>RopePerf</strong> Gameplay Debugger
+          category classifies every rope’s frame as SLEEP / GPU_SOLVE / GPU_OVERRIDE / CPU_SOLVE /
+          CPU_OVERRIDE / IDLE, which is the fastest way to catch one that quietly dropped.{' '}
+          <Link to="/docs/debugging">Debugging &amp; Profiling</Link> covers it.
+        </p>
+
+        <h2>The dials</h2>
+        <PropTable
+          columns={['Setting', 'Default', 'What it trades']}
+          rows={[
+            ['Substeps', '12', 'The main cost multiplier. Fewer substeps is cheaper and lets a fast rope stretch or tunnel.'],
+            ['Iterations', '4', 'Constraint passes per substep. Fewer is cheaper and softer — the rope holds its length less exactly.'],
+            [
+              'Node count',
+              'per rope',
+              'Set by the rope’s length and segment length rather than typed in directly. It scales everything, and it is what pushes the tube past its 512-ring budget.',
+            ],
+            [
+              'Allow Sleep',
+              'on',
+              'An idle rope stops solving entirely once every node has stayed under 3 cm/s for half a second. The single biggest saving in a scene full of ropes that are mostly hanging still.',
+            ],
+            [
+              'Distance LOD',
+              'on',
+              'Past 3000 cm from the camera, iterations fall off linearly to a quarter of their count by 8000 cm. Convergence error is invisible at that range. With no camera — a dedicated server — iterations stay full.',
+            ],
+          ]}
+        />
+        <Callout type="info" title="Contact Solve Interval is not a general dial">
+          It appears in the solver config, but it only affects the CPU fallback — the GPU is the single
+          runtime path in normal play — and it is not exposed to the Details panel. Useful when you are
+          deliberately profiling the fallback with expensive SDF colliders; irrelevant otherwise.
+        </Callout>
+
+        <h2>Measuring your own budget</h2>
+        <p>
+          The plugin ships <strong>01_StressTest</strong> for exactly this. Open it, put the number of
+          ropes you actually expect on screen, and read the three things that matter together:
+        </p>
+        <CodeBlock
+          language="text"
+          code={`stat unit     // game / draw / GPU — the frame budget
+stat gpu      // where the GPU time actually goes
+Gameplay Debugger -> RopePerf  // per-rope: is anything on the CPU path?`}
+        />
+        <p>
+          Measure at your shipping node count and with your own collider setup — SDF colliders and
+          analytic capsules are not the same cost — and record the result as a budget you can hold
+          yourself to:
+        </p>
+        <PropTable
+          columns={['Ropes on screen', 'Game thread', 'GPU', 'All on GPU path?']}
+          rows={[
+            ['1', '—', '—', '—'],
+            ['10', '—', '—', '—'],
+            ['50', '—', '—', '—'],
+          ]}
+        />
+        <Callout type="info" title="Why this table is empty">
+          We have not published figures we did not measure across a range of hardware. Fill this in from
+          your own target machine — it is the only number that means anything for your project.
+        </Callout>
       </>
     ),
   },
@@ -1565,6 +1755,23 @@ Rope->GetSolverLODScale();`}
     title: 'FAQ & Troubleshooting',
     body: (
       <>
+        <h2>Does it work in multiplayer?</h2>
+        <p>
+          No. The plugin does not replicate rope or wrap state, and on a replicated pawn the wielder
+          deliberately does nothing for simulated proxies rather than projecting a locally guessed rope
+          that would fight network smoothing. A remote client will not see a correct rope. See{' '}
+          <Link to="/docs/requirements">Requirements &amp; Compatibility</Link>.
+        </p>
+
+        <h2>Do I need to write C++?</h2>
+        <p>
+          No. Throwing, tuning, reading tension and reacting to every stage of the loop are all callable
+          and bindable from Blueprint — see{' '}
+          <Link to="/docs/blueprint-api">Blueprint API &amp; Events</Link>. C++ is for adding a new
+          collider source or provider, or driving the solver yourself, which is{' '}
+          <Link to="/docs/extending">Extending in C++</Link>.
+        </p>
+
         <h2>The rope falls through the character.</h2>
         <p>
           Make sure a collider provider is registered on the target and lists the bones you expect to hit.
