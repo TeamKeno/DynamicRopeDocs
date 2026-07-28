@@ -510,7 +510,12 @@ body.reel-active .site-footer { display: none; }
   margin: 0 auto;
   display: grid;
   grid-template-columns: 248px 1fr;
-  gap: 40px;
+  /* The nav's hover and active states are full-width pills, so at a tight gap
+     their right edge crowds the first words of every line. Wide screens have
+     room to spare — the content column stops at 800px well before the grid runs
+     out — but narrow ones would pay for the gap out of the prose, hence the
+     clamp rather than a flat value. */
+  gap: clamp(40px, 5vw, 72px);
   padding: 0 24px;
   flex: 1;
 }
