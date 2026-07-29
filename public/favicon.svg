@@ -1,0 +1,30 @@
+<!-- Brand mark. Same geometry as src/components/RopeMark.jsx — edit both together. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none" stroke-linecap="round">
+  <defs>
+    <linearGradient id="s" x1="28" y1="4" x2="4" y2="28" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#d98443"/>
+      <stop offset="1" stop-color="#9c5220"/>
+    </linearGradient>
+  </defs>
+
+  <g stroke="url(#s)" stroke-width="5.2">
+    <path d="M16.8 18.2A7 7 0 1 1 21.1 18.9"/>
+    <path d="M15.2 13.8A7 7 0 1 1 10.9 13.1"/>
+    <path d="M24.9 7.1L28.5 3.5"/>
+    <path d="M7.1 24.9L3.5 28.5"/>
+  </g>
+
+  <!-- The twist, as pale ticks stepping along the rope. Butt caps: a round cap
+       adds half the stroke width to each end of every dash, which would run
+       them together. -->
+  <g stroke="#f6c79b" stroke-width="3.4" stroke-linecap="butt" stroke-dasharray="1.8 3.4" opacity="0.7">
+    <path d="M16.8 18.2A7 7 0 1 1 21.1 18.9"/>
+    <path d="M15.2 13.8A7 7 0 1 1 10.9 13.1"/>
+    <!-- The tails start on the loop's centreline, so their ticks are offset out
+         past the 2.6 the ring covers or the first one lands on the ring. -->
+    <g stroke-dashoffset="2.6">
+      <path d="M24.9 7.1L28.5 3.5"/>
+      <path d="M7.1 24.9L3.5 28.5"/>
+    </g>
+  </g>
+</svg>

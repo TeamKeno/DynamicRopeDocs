@@ -74,7 +74,9 @@ code {
 }
 .brand { display: flex; align-items: center; gap: 10px; color: var(--text); }
 .brand:hover { text-decoration: none; }
-.brand__mark { font-size: 20px; }
+/* Sized by its own width/height attributes; this just stops the flex row from
+   squeezing it and removes the inline-element baseline gap. */
+.brand__mark { display: block; flex: none; }
 .brand__name { font-weight: 700; font-size: 17px; letter-spacing: -0.01em; }
 .brand__badge {
   font-size: 11px;

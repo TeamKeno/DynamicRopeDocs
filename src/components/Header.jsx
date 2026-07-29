@@ -1,12 +1,13 @@
 import { Link, NavLink } from 'react-router-dom'
 import { PLUGIN } from '../data/nav.js'
+import RopeMark from './RopeMark.jsx'
 
 export default function Header() {
   return (
     <header className="site-header">
       <div className="site-header__inner">
         <Link to="/" className="brand">
-          <span className="brand__mark" aria-hidden>🪢</span>
+          <RopeMark className="brand__mark" />
           <span className="brand__name">{PLUGIN.name}</span>
           <span className="brand__badge">{PLUGIN.engine}</span>
         </Link>
