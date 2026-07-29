@@ -687,26 +687,46 @@ body.reel-active .site-footer { display: none; }
 /* ---------- Doc pager ---------- */
 .doc__pager {
   display: flex;
-  justify-content: space-between;
+  align-items: stretch;
+  justify-content: flex-end;
   gap: 16px;
   margin-top: 56px;
   padding-top: 24px;
   border-top: 1px solid var(--border);
 }
+/* A stated width on the links alone, so the two match whatever their page
+   titles happen to be — sized by content, whichever page had the longer name
+   came out the wider button. Stretch settles the height the same way when one
+   title wraps and the other does not.
+   The placeholder standing in for a missing previous or next is left out of it:
+   with nothing in it and no width of its own it collapses, and the remaining
+   button keeps its place at the right rather than sliding over. */
 .doc__pager-link {
   display: flex;
   flex-direction: column;
   gap: 4px;
-  padding: 14px 18px;
+  flex: 0 1 196px;
+  min-width: 0;
+  padding: 16px;
   border: 1px solid var(--border);
   border-radius: 10px;
-  min-width: 180px;
   color: var(--text);
+  transition: background-color 0.15s, border-color 0.15s, color 0.15s;
 }
-.doc__pager-link:hover { border-color: #384155; text-decoration: none; }
+/* Straight inversion — the text colour becomes the fill and the page behind it
+   becomes the text. A border-colour shift alone was easy to miss. */
+.doc__pager-link:hover {
+  background: var(--text);
+  border-color: var(--text);
+  color: var(--bg);
+  text-decoration: none;
+}
 .doc__pager-link--next { text-align: right; }
-.doc__pager-dir { font-size: 12px; color: var(--text-faint); }
-.doc__pager-title { font-weight: 600; }
+.doc__pager-dir { font-size: 11px; color: var(--text-faint); }
+/* Inherit rather than name the colour again, and keep the label secondary to
+   the title by stepping it back instead. */
+.doc__pager-link:hover .doc__pager-dir { color: inherit; opacity: 0.65; }
+.doc__pager-title { font-weight: 600; font-size: 14px; }
 
 /* ---------- Footer ---------- */
 .site-footer { border-top: 1px solid var(--border); margin-top: auto; }
