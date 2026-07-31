@@ -96,7 +96,7 @@ function Cta() {
         <dt>Network</dt>
         <dd>Single-player — no replication</dd>
         <dt>Included</dt>
-        <dd>Demo map, stress-test map, 13 sample Blueprints</dd>
+        <dd>Demo map, stress-test map, sample Blueprints</dd>
       </dl>
       {/* The site footer is hidden while the reel is running (see
           body.reel-active in global.css), so this is the only contact route on

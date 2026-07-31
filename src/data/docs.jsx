@@ -140,8 +140,8 @@ export const DOCS = {
               'A second level for putting many ropes on screen at once. This is the one to measure with — see Performance & Budgeting.',
             ],
             [
-              '13 sample Blueprints',
-              'Rope, snare, lever, pressure plate, elevator, movable target, crate, door, helicopter, basket goal and an AI character — worked examples rather than a single showcase actor.',
+              'Sample Blueprints',
+              'Worked examples rather than a single showcase actor — a snare, a lever, a pressure plate, an elevator, a helicopter winch, a basket goal and an AI character among them, plus the HUD and level pieces the demo map is assembled from.',
             ],
             ['A baked SDF asset', 'The third-person mannequin, already baked, so the SDF path runs without authoring anything first.'],
             ['Third-person template + throw / pull animations', 'A character to throw from on the first launch.'],
