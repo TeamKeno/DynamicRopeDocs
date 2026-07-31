@@ -845,11 +845,38 @@ body.reel-active .site-footer { display: none; }
 @media (max-width: 900px) {
   .hero { grid-template-columns: 1fr; padding-top: 48px; }
   .hero__title { font-size: 48.4px; }
-  /* Stacked: media under its text, and the flip has nothing left to flip. */
-  .showcase__row { grid-template-columns: 1fr; gap: 20px; }
-  .showcase__row--flip .showcase__text,
-  .showcase__row--flip .showcase__media { order: 0; }
+  /* Stacked, clip first: the picture is what identifies a block, and on a phone
+     it has to arrive before the reader decides whether to keep going. Source
+     order stays text-then-media so reading and tab order are unchanged — the
+     swap is a one-column area list, not `order`, for the same reason the
+     two-column flip is. The flip has nothing left to flip. */
+  .showcase__row,
+  .showcase__row--flip {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      'media'
+      'text';
+    gap: 20px;
+  }
   .showcase__heading { font-size: 24.2px; }
+  /* Blocks size to their content. Holding each one to a full screen did keep
+     them one to a view, but a block is about 470px of content in a 560px box,
+     so it bought that with ~90px of dead air split above and below — more than
+     the gap it was supposed to be tuned by, and untouchable from the gap. On a
+     375x667 phone a block still fills most of the screen; what shows below it
+     is the top of the next one, which is the useful signal that there is more.
+     The gap alone now decides the rhythm, so it goes back up to a real value. */
+  .showcase__rows { gap: 28px; }
+  .showcase { padding: 16px; }
+  .reel--static .reel__panel { padding: 24px; }
+  /* The closing panel is the last thing on the page, and three paddings stacked
+     under it: its own, its 96px bottom margin — a desktop value, sized for a
+     long scrolling page — and the panel's. That put 168px of nothing between
+     the support address and the footer rule. */
+  .cta { padding: 32px 24px; margin: 16px auto 20px; }
+  /* 35.2px is a desktop display size; at this width it wraps and towers over
+     the block it introduces. */
+  .section-title { font-size: 26px; margin-bottom: 14px; }
   .docs-layout { grid-template-columns: 1fr; }
   .sidebar {
     position: static;
@@ -857,4 +884,59 @@ body.reel-active .site-footer { display: none; }
     padding: 20px 0 0;
     border-bottom: 1px solid var(--border);
   }
+}
+
+/* Phones. The block above collapses the two-column layouts; this one deals with
+   what is still sized for a laptop once the window is 375-430px wide. The reel
+   is not a concern here — RopeReel only engages above 900px, so a phone always
+   gets the plain scrolling fallback. */
+@media (max-width: 600px) {
+  /* The header wanted roughly 510px of content in a 375px window: brand mark,
+     name, engine badge, and three nav links. The badge goes first because it is
+     the only thing in the bar that is not navigation, and the engine range is
+     stated on Requirements and in the closing panel's spec list anyway. */
+  .site-header__inner { padding: 0 16px; }
+  .brand { gap: 8px; }
+  .brand__name { font-size: 16px; }
+  .brand__badge { display: none; }
+  .site-nav { gap: 2px; }
+  .site-nav__link { padding: 7px 9px; font-size: 13px; }
+
+  .hero { padding: 40px 16px 32px; gap: 32px; }
+  .hero__title { font-size: 36px; }
+  .hero__tagline { font-size: 19px; }
+  .hero__lead { font-size: 15px; }
+  /* Both buttons fit at 375px but not at 320px, and an overflowing row would be
+     clipped rather than reachable. */
+  .hero__actions { flex-wrap: wrap; }
+
+  /* Tighter again on a phone, where the same spacing eats a larger share of a
+     shorter screen. Only the side padding differs from the block above; the
+     vertical values just carry the reduction a step further. */
+  .showcase { padding: 12px; }
+  .showcase__rows { gap: 24px; }
+  .reel--static .reel__panel { padding: 20px; }
+  .section-title { font-size: 22px; margin-bottom: 12px; }
+  .showcase__heading { font-size: 21px; }
+  .showcase__body { font-size: 15px; }
+
+  .cta { padding: 28px 16px; margin: 12px auto 16px; }
+  .cta__lead { font-size: 16.5px; }
+  /* Label above value instead of beside it. The two-column grid gave the values
+     a column too narrow to read at this width, and the longest of them — the
+     engine list — wrapped to four lines against its own label. */
+  .cta__spec { grid-template-columns: 1fr; gap: 0; }
+  .cta__spec dt { margin-top: 12px; }
+  .cta__spec dt:first-of-type { margin-top: 0; }
+
+  .docs-layout { padding: 0 16px; }
+  .docs-main { padding: 28px 0 56px; }
+  .doc__title { font-size: 30px; }
+  .doc__body { font-size: 15.5px; }
+  .doc__body h2 { font-size: 20px; }
+  /* Side by side, the two pager buttons shrink past their own titles: they are
+     flex: 0 1 196px against about 327px of usable width. */
+  .doc__pager { flex-direction: column; }
+  .doc__pager-link { flex: 1 1 auto; }
+  .doc__pager-link--next { text-align: left; }
 }
