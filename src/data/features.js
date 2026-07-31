@@ -232,7 +232,12 @@ export const SHOWCASE = [
           'One component on the character that holds the rope',
           'An opt-in camera cuts to the catch for a beat',
         ],
-        media: null,
+        media: {
+          type: 'image',
+          src: 'media/Gameplay.webp',
+          alt:
+            'Two frames side by side: a character hanging limp from a rope slung beneath a hovering helicopter, and a character suspended spread-eagled inside a wooden frame by ropes at both wrists.',
+        },
         mediaHint: 'Full input loop from a player camera, HUD visible',
       },
       {
