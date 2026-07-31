@@ -678,7 +678,21 @@ body.reel-active .site-footer { display: none; }
   height: 100%;
   border: 0;
 }
-.video-embed__caption {
+/* ---------- Doc figures ---------- */
+/* Drawn at the shot's own ratio, not cropped to the layout's — see Figure in
+   DocPrimitives. The width and height attributes hold the box before the file
+   arrives, which is the same reflow the embed's ratio box prevents. */
+.doc-figure { margin: 20px 0 26px; }
+.doc-figure__img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: #0a0c11;
+}
+
+.figure-caption {
   margin-top: 8px;
   font-size: 13px;
   color: var(--text-faint);

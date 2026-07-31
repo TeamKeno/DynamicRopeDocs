@@ -37,7 +37,7 @@ const MANIFEST = join(SRC, '.manifest.json')
 // q80 does visibly mush the low-contrast grey rows (particles=, registered=).
 // So text shots get q90, and everything else -- 3D renders with no glyphs in
 // them -- stays at q80.
-const TEXT = new Set(['Authoring', 'Debugging'])
+const TEXT = new Set(['Authoring', 'Debugging', 'StressTest'])
 const QUALITY = 80
 const QUALITY_TEXT = 90
 
@@ -46,6 +46,11 @@ const QUALITY_TEXT = 90
 const RATIOS = { Hero: 16 / 11 }
 const DEFAULT_RATIO = 16 / 9
 const RATIO_TOLERANCE = 0.01
+// Doc figures are not in a frame at all -- DocPrimitives' Figure draws them at
+// their own ratio, precisely so a readout cannot be cropped off the edge. The
+// ratio warning does not apply to them, and firing it anyway would be the kind
+// of standing false alarm that teaches people to skip the warnings that matter.
+const UNFRAMED = new Set(['StressTest'])
 
 if (!existsSync(SRC)) {
   console.error(`No ${SRC}/ directory. Put the original captures there.`)
@@ -108,7 +113,7 @@ for (const file of inputs.sort()) {
 
   const expected = RATIOS[name] ?? DEFAULT_RATIO
   const actual = width / height
-  if (Math.abs(actual - expected) > RATIO_TOLERANCE) {
+  if (!UNFRAMED.has(name) && Math.abs(actual - expected) > RATIO_TOLERANCE) {
     warnings.push(
       `${name}: ${width}x${height} is ${actual.toFixed(3)}, wanted ${expected.toFixed(3)} — ` +
         `object-fit: cover will crop it`,

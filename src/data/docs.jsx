@@ -3,7 +3,14 @@
 // headers (URopeComponent, URopeWielderComponent, the Core/ config structs).
 // Still to replace before publishing: screenshots, video links, the Fab URL
 // and the support address in nav.js.
-import { CodeBlock, Callout, PropTable, Names, VideoEmbed } from '../components/DocPrimitives.jsx'
+import {
+  CodeBlock,
+  Callout,
+  PropTable,
+  Names,
+  VideoEmbed,
+  Figure,
+} from '../components/DocPrimitives.jsx'
 import { Link } from 'react-router-dom'
 import { PLUGIN, hasSupportEmail } from './nav.js'
 
@@ -852,10 +859,10 @@ Rope->HadLogicOverrideThisFrame();  // a logic phase produced node overrides
     body: (
       <>
         <p>
-          This page is about where a rope’s cost goes, which dials move it, and how to measure your own
-          numbers. It deliberately does not quote frame times: the answer depends on your hardware, your
-          node counts and how many ropes are awake, and a figure measured on someone else’s machine
-          would not be a budget you could plan against.
+          This page is about where a rope’s cost goes and which dials move it. It closes with one
+          measured figure from the stress-test map, spelled out with the machine and the settings that
+          produced it — a frame time quoted without those is not something you can plan against, since
+          the answer moves with your hardware, your node counts and how many ropes are awake.
         </p>
 
         <h2>Where the time goes</h2>
@@ -920,33 +927,36 @@ Rope->HadLogicOverrideThisFrame();  // a logic phase produced node overrides
           deliberately profiling the fallback with expensive SDF colliders; irrelevant otherwise.
         </Callout>
 
-        <h2>Measuring your own budget</h2>
+        <h2>What it costs, measured</h2>
         <p>
-          The plugin ships <strong>01_StressTest</strong> for exactly this. Open it, put the number of
-          ropes you actually expect on screen, and read the three things that matter together:
+          The plugin ships <strong>01_StressTest</strong> for putting a number on this. Below is that
+          map with 30 ropes awake at once, every one of them colliding against baked SDFs rather than
+          analytic capsules — the expensive collider, chosen deliberately. The rope work costs{' '}
+          <strong>1–3 ms of frame time</strong>.
         </p>
-        <CodeBlock
-          language="text"
-          code={`stat unit     // game / draw / GPU — the frame budget
-stat gpu      // where the GPU time actually goes
-Gameplay Debugger -> RopePerf  // per-rope: is anything on the CPU path?`}
+        <Figure
+          src="media/StressTest.webp"
+          width={996}
+          height={792}
+          alt="The stress-test map: thirty ropes hanging and swinging around a mannequin, with the input legend and a frame-time readout overlaid."
+          caption="01_StressTest — 30 ropes, SDF collision, all of them on the GPU path."
         />
-        <p>
-          Measure at your shipping node count and with your own collider setup — SDF colliders and
-          analytic capsules are not the same cost — and record the result as a budget you can hold
-          yourself to:
-        </p>
         <PropTable
-          columns={['Ropes on screen', 'Game thread', 'GPU', 'All on GPU path?']}
+          columns={['Test environment', 'Value']}
           rows={[
-            ['1', '—', '—', '—'],
-            ['10', '—', '—', '—'],
-            ['50', '—', '—', '—'],
+            ['Scene', '30 ropes awake, SDF collision, the shipped 01_StressTest map'],
+            ['Per rope', '72 nodes — 2,160 simulated nodes across the scene'],
+            ['Solver', '12 substeps × 4 iterations, both defaults'],
+            ['Engine', 'UE 5.7, Development Editor'],
+            ['CPU', 'Intel Core i7-14700'],
+            ['GPU', 'NVIDIA GeForce RTX 5060'],
           ]}
         />
-        <Callout type="info" title="Why this table is empty">
-          We have not published figures we did not measure across a range of hardware. Fill this in from
-          your own target machine — it is the only number that means anything for your project.
+        <Callout type="info" title="One machine, one map">
+          Take this as a reference point rather than a budget. It is an editor build, not a packaged
+          one, and your own scene will differ on all three of the things that matter most — node count,
+          how many ropes are awake at once, and whether they collide against SDFs or capsules. Re-run
+          the map at your own numbers and hold yourself to what it says there.
         </Callout>
       </>
     ),
