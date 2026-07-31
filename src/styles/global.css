@@ -631,6 +631,11 @@ body.reel-active .site-footer { display: none; }
   font-weight: 600;
 }
 
+/* Rendered at every width, shown only where the sidebar folds away — see the
+   Tablet tier. On PC the sidebar is beside the page already and a button to
+   reveal it would be a control for something that is not hidden. */
+.docs-nav-toggle { display: none; }
+
 .docs-main { min-width: 0; padding: 40px 0 80px; }
 
 /* ---------- Doc content ---------- */
@@ -908,12 +913,48 @@ body.reel-active .site-footer { display: none; }
      support address and the footer rule. */
   .cta { padding: 32px 24px; margin: 16px auto 20px; }
 
-  /* Docs */
+  /* Docs — one column, so the sidebar folds behind a button rather than sitting
+     in flow: twenty links ahead of every page pushed the first heading a
+     screenful down. The button is the first grid item, which puts it on its own
+     row above both the panel and the page, and it sticks under the header so
+     the contents stay reachable from anywhere on a long page rather than only
+     from the top. */
   .docs-layout { grid-template-columns: 1fr; }
+  .docs-nav-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-self: end;
+    align-self: start;
+    position: sticky;
+    top: calc(var(--header-h) + 12px);
+    z-index: 15;
+    margin-top: 16px;
+    padding: 8px 14px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--bg-elev);
+    color: var(--text);
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.4;
+    cursor: pointer;
+  }
+  /* The same inversion the doc pager and the buttons use. */
+  .docs-nav-toggle:hover {
+    background: var(--text);
+    border-color: var(--text);
+    color: var(--bg);
+  }
   .sidebar {
     position: static;
     height: auto;
-    padding: 20px 0 0;
+    padding: 0;
+    display: none;
+  }
+  .docs-layout--nav-open .sidebar {
+    display: block;
+    padding: 12px 0 20px;
     border-bottom: 1px solid var(--border);
   }
 }

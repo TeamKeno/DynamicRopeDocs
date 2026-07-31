@@ -1,9 +1,9 @@
 import { NavLink } from 'react-router-dom'
 import { DOC_NAV } from '../data/nav.js'
 
-export default function Sidebar() {
+export default function Sidebar({ id }) {
   return (
-    <aside className="sidebar">
+    <aside className="sidebar" id={id}>
       <nav>
         {DOC_NAV.map((group) => (
           <div key={group.group} className="sidebar__group">
