@@ -255,7 +255,15 @@ export const SHOWCASE = [
           'XPBD solver and tube builder on RDG compute',
           'One console command forces the CPU path for comparison',
         ],
-        media: null,
+        // No counter in frame, deliberately. The block's copy avoids speed
+        // claims because none have been measured, and an fps readout in the
+        // picture would make the measured claim the text declines to.
+        media: {
+          type: 'image',
+          src: 'media/Performance.webp',
+          alt:
+            'A test scene on a grid floor crowded with ropes — a couple of dozen standing, draping and coiling on the ground — with a single character among them.',
+        },
         mediaHint: 'A crowd of ropes running at once',
       },
     ],
