@@ -824,9 +824,10 @@ Rope->HadLogicOverrideThisFrame();  // a logic phase produced node overrides
         />
         <Callout type="warn" title="IsGpuSteppedThisFrame() is not “GPU solving”">
           The subsystem uploads override-only frames (Wrapping / Releasing / GuidedThrow) to the GPU too.
-          Read that getter together with the other two, or use the <strong>RopePerf</strong> Gameplay
-          Debugger category, which already classifies each rope as SLEEP / GPU_SOLVE / GPU_OVERRIDE /
-          CPU_SOLVE / CPU_OVERRIDE / IDLE.
+          Read that getter together with the other two, or use the <strong>Rope</strong> Gameplay Debugger
+          category, whose <code>solve=</code> line already folds all three into one of SLEEP / GPU_SOLVE /
+          GPU_OVERRIDE / CPU_SOLVE / CPU_OVERRIDE / IDLE. <strong>RopePerf</strong> does not draw this
+          distinction — it reports only <code>gpu</code> or <code>cpu</code> per rope.
         </Callout>
 
         <h2>Scaling knobs</h2>
@@ -878,8 +879,10 @@ Rope->HadLogicOverrideThisFrame();  // a logic phase produced node overrides
         />
         <p>
           Do not guess at which path a rope took. The <strong>RopePerf</strong> Gameplay Debugger
-          category classifies every rope’s frame as SLEEP / GPU_SOLVE / GPU_OVERRIDE / CPU_SOLVE /
-          CPU_OVERRIDE / IDLE, which is the fastest way to catch one that quietly dropped.{' '}
+          category counts how many ropes are on each path and marks per rope whether it solved on the GPU
+          or the CPU, which is the fastest way to catch one that quietly dropped. When you need the exact
+          path a single frame took, the <strong>Rope</strong> category names it: SLEEP / GPU_SOLVE /
+          GPU_OVERRIDE / CPU_SOLVE / CPU_OVERRIDE / IDLE.{' '}
           <Link to="/docs/debugging">Debugging &amp; Profiling</Link> covers it.
         </p>
 
@@ -1290,9 +1293,17 @@ Rope.Ragdoll.Destroy   // destroy the target, to exercise the mid-wrap loss path
           ]}
         />
         <p>
-          <strong>RopePerf</strong> classifies each rope’s frame as SLEEP / GPU_SOLVE / GPU_OVERRIDE /
-          CPU_SOLVE / CPU_OVERRIDE / IDLE, which is the fastest way to catch a rope that quietly dropped to
-          the CPU path.
+          Whatever sub-views are on, the <strong>Rope</strong> category prints a{' '}
+          <code>solve=</code> line naming the path that frame took, as one of six tokens: SLEEP /
+          GPU_SOLVE / GPU_OVERRIDE / CPU_SOLVE / CPU_OVERRIDE / IDLE. The OVERRIDE pair is the useful
+          distinction — the rope moved because a logic phase placed its nodes, not because anything
+          solved.
+        </p>
+        <p>
+          <strong>RopePerf</strong> is the per-rope sweep rather than the detail view. Each rope reports{' '}
+          <code>gpu</code>, <code>cpu</code>, <code>SLEEP</code> or <code>idle</code>, under a world
+          summary counting how many ropes are on each, which is the fastest way to catch one that quietly
+          dropped to the CPU path.
         </p>
 
         <h2>Console</h2>
@@ -1814,8 +1825,10 @@ Rope->GetSolverLODScale();`}
         <h2>The rope quietly got slow.</h2>
         <p>
           It probably dropped to the CPU path. Enable the <strong>RopePerf</strong> Gameplay Debugger
-          category — it labels each rope’s frame CPU_SOLVE / GPU_SOLVE and so on. The usual causes are a
-          node count or ring count above 512, or no renderable RHI.
+          category — it marks each rope <code>gpu</code> or <code>cpu</code>, so a stray <code>cpu</code>
+          row is the answer. Switch to the <strong>Rope</strong> category if you then need to know which
+          kind of frame it was. The usual causes are a node count or ring count above 512, or no
+          renderable RHI.
         </p>
 
         <h2>Performance dips with many ropes.</h2>
