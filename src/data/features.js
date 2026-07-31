@@ -200,7 +200,12 @@ export const SHOWCASE = [
           'Six sub-views on hotkeys — flight, wrap, colliders, aim',
           'A second view flags any rope that fell back to the CPU',
         ],
-        media: null,
+        media: {
+          type: 'image',
+          src: 'media/Debugging.webp',
+          alt:
+            'A Gameplay Debugger overlay over a pitch full of characters. The Rope category lists its six sub-view toggles and a solve=GPU_SOLVE line; below it RopePerf counts 34 ropes on the GPU and none on the CPU, over a per-rope list of phases and node counts.',
+        },
         mediaHint: 'Gameplay Debugger overlay during a live throw',
       },
     ],
