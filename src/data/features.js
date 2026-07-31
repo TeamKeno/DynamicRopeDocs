@@ -26,18 +26,38 @@
  * rather than as a broken image. To fill one in:
  *
  *   media: {
- *     type: 'video',              // 3-6s silent loop, 1280x720, ~1-2MB
- *     webm: '/media/throw.webm',  // VP9
- *     mp4:  '/media/throw.mp4',   // H.264, for Safari
- *     poster: '/media/throw.webp',
+ *     type: 'video',             // 3-6s silent loop, 1280x720, ~1-2MB
+ *     webm: 'media/throw.webm',  // VP9
+ *     mp4:  'media/throw.mp4',   // H.264, for Safari
+ *     poster: 'media/throw.webp',
  *     alt: 'A rope thrown at a running character wraps its torso.',
  *   }
  *
- *   media: { type: 'image', src: '/media/modes.webp', alt: '...' }
+ *   media: { type: 'image', src: 'media/modes.webp', alt: '...' }
  *
- * Files go in `public/media/`. Please do not use GIF: the same three seconds
- * of gameplay is ~20MB as a GIF and ~1.5MB as VP9.
+ * Files go in `public/media/`, and paths here are written **without a leading
+ * slash**. The site is served from a subpath (vite.config.js sets base to
+ * '/DynamicRopeDocs/'), and Vite cannot rewrite a path that is just a string in
+ * a data file — '/media/throw.webp' would resolve against the domain root and
+ * 404 once deployed. src/lib/asset.js prepends the base at render time.
+ *
+ * Please do not use GIF: the same three seconds of gameplay is ~20MB as a GIF
+ * and ~1.5MB as VP9. For stills prefer WebP over PNG — a 1280x720 game
+ * screenshot is ~1.7MB as PNG and ~120KB as WebP, and there are nine of these.
+ * Screenshots carrying small text (the bake panel, the debugger overlay) want
+ * quality 90+; lossy WebP smears fine glyphs first.
  */
+/**
+ * The hero visual, in the same shape as a showcase `media` (see above). Null
+ * renders the dashed placeholder carrying HERO_MEDIA_HINT.
+ *
+ * Keep this to the one arresting moment. The full throw -> wrap -> hold
+ * sequence is the core-loop block's job one panel down, and showing it twice
+ * spends the hero on something the reader is about to see anyway.
+ */
+export const HERO_MEDIA = null
+export const HERO_MEDIA_HINT = 'A wrapped character being dragged, 3/4 angle'
+
 export const SHOWCASE = [
   {
     id: 'throw-wrap',

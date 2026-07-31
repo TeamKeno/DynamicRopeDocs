@@ -1,8 +1,47 @@
 import { Link } from 'react-router-dom'
 import { PLUGIN } from '../data/nav.js'
-import { SHOWCASE } from '../data/features.js'
+import { HERO_MEDIA, HERO_MEDIA_HINT, SHOWCASE } from '../data/features.js'
+import { asset } from '../lib/asset.js'
 import RopeReel from '../components/RopeReel.jsx'
 import Showcase from '../components/Showcase.jsx'
+
+// The hero frame is the LCP element, so nothing here is lazy and the video is
+// left to autoplay rather than waiting on an observer the way the showcase
+// clips do — it is on screen at load by definition. The placeholder keeps
+// aria-hidden because it is decorative filler; real media carries its own alt
+// and is exposed.
+function HeroVisual() {
+  if (!HERO_MEDIA) {
+    return (
+      <div className="hero__visual" aria-hidden>
+        <div className="hero__visual-placeholder">{HERO_MEDIA_HINT}</div>
+      </div>
+    )
+  }
+  if (HERO_MEDIA.type === 'video') {
+    return (
+      <div className="hero__visual">
+        <video
+          className="hero__visual-media"
+          poster={asset(HERO_MEDIA.poster)}
+          aria-label={HERO_MEDIA.alt}
+          autoPlay
+          muted
+          loop
+          playsInline
+        >
+          {HERO_MEDIA.webm ? <source src={asset(HERO_MEDIA.webm)} type="video/webm" /> : null}
+          {HERO_MEDIA.mp4 ? <source src={asset(HERO_MEDIA.mp4)} type="video/mp4" /> : null}
+        </video>
+      </div>
+    )
+  }
+  return (
+    <div className="hero__visual">
+      <img className="hero__visual-media" src={asset(HERO_MEDIA.src)} alt={HERO_MEDIA.alt} />
+    </div>
+  )
+}
 
 function Hero() {
   return (
@@ -25,10 +64,7 @@ function Hero() {
           </a>
         </div>
       </div>
-      <div className="hero__visual" aria-hidden>
-        {/* TODO: replace with a looping gameplay clip or hero screenshot */}
-        <div className="hero__visual-placeholder">Gameplay clip / screenshot</div>
-      </div>
+      <HeroVisual />
     </div>
   )
 }

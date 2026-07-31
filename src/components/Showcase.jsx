@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react'
+import { asset } from '../lib/asset.js'
 
 /**
  * A group of full-width showcase rows: prose on one side, a clip on the other.
@@ -29,15 +30,15 @@ function ShowcaseVideo({ media }) {
     <video
       ref={ref}
       className="showcase__frame"
-      poster={media.poster}
+      poster={asset(media.poster)}
       aria-label={media.alt}
       muted
       loop
       playsInline
       preload="metadata"
     >
-      {media.webm ? <source src={media.webm} type="video/webm" /> : null}
-      {media.mp4 ? <source src={media.mp4} type="video/mp4" /> : null}
+      {media.webm ? <source src={asset(media.webm)} type="video/webm" /> : null}
+      {media.mp4 ? <source src={asset(media.mp4)} type="video/mp4" /> : null}
     </video>
   )
 }
@@ -52,7 +53,7 @@ function ShowcaseFrame({ media, hint }) {
     )
   }
   if (media.type === 'video') return <ShowcaseVideo media={media} />
-  return <img className="showcase__frame" src={media.src} alt={media.alt} loading="lazy" />
+  return <img className="showcase__frame" src={asset(media.src)} alt={media.alt} loading="lazy" />
 }
 
 export default function Showcase({ title, items, startIndex = 0 }) {

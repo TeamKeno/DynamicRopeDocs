@@ -29,8 +29,17 @@ src/
     nav.js             # PLUGIN metadata + sidebar structure + page order
     features.js        # landing feature cards
     docs.jsx           # doc page content, keyed by slug  ← edit copy here
+  lib/asset.js         # prefixes public/ paths with the Vite base  ← media paths must use it
   styles/global.css    # dark theme
+public/media/          # clips and screenshots referenced from features.js
 ```
+
+Media paths in `features.js` are written **without a leading slash**
+(`media/throw.webp`). The site is served from a subpath, and a leading slash
+would 404 once deployed — see the comment in `src/lib/asset.js`.
+
+Frames are cropped to fill (`object-fit: cover`), so shoot to the ratio:
+**16:9** (1280x720) for the showcase rows, **16:11** (1280x880) for the hero.
 
 ## Editing content
 
@@ -42,7 +51,7 @@ src/
 ## Before publishing (TODO)
 
 - [ ] Fill in `PLUGIN.fabUrl` and `PLUGIN.supportEmail` in `src/data/nav.js`.
-- [ ] Replace the hero visual placeholder in `src/pages/Home.jsx` with a gameplay clip / screenshot.
+- [ ] Fill in `HERO_MEDIA` in `src/data/features.js` (the hero renders a placeholder until it is set).
 - [ ] Add real screenshots to the Quick Start and Concepts pages.
 - [ ] Re-check `PLUGIN.engineVersions` in `src/data/nav.js` against the versions actually shipped on Fab.
 - [ ] Set `base` in `vite.config.js` if deploying under a subpath (e.g. GitHub Pages).
