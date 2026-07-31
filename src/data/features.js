@@ -116,7 +116,12 @@ export const SHOWCASE = [
           'A single wrap can span several bones',
           'Swept contact keeps a fast rope from passing through',
         ],
-        media: null,
+        media: {
+          type: 'image',
+          src: 'media/Collision.webp',
+          alt:
+            'Three frames side by side: a thrown rope reaching a standing character, then coiled a few turns around their torso, then wound tight in many turns while the thrower keeps hold of the other end.',
+        },
         mediaHint: 'Rope dragged across a moving platform and a bone capsule',
       },
       {
@@ -132,7 +137,12 @@ export const SHOWCASE = [
           'Tension is a number you can build on',
           'Set a tension limit and the rope lets go on its own',
         ],
-        media: null,
+        media: {
+          type: 'image',
+          src: 'media/HoldPull.webp',
+          alt:
+            'A character braced backwards hauling a rope pulled straight across the floor to a lever post, where it is coiled several times around the shaft.',
+        },
         mediaHint: 'Pull gauge filling, then climb-in on a heavy target',
       },
     ],
