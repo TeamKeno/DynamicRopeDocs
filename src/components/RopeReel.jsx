@@ -74,7 +74,11 @@ export default function RopeReel({ panels, label = 'Highlights', quickActions = 
   // --- enable / disable -----------------------------------------------------
   useEffect(() => {
     const motion = window.matchMedia('(prefers-reduced-motion: reduce)')
-    const wide = window.matchMedia('(min-width: 900px) and (min-height: 560px)')
+    // 901, not 900, so this and the stylesheet draw the same line from opposite
+    // sides. global.css hands over to its Tablet tier at (max-width: 900px); at
+    // exactly 900px both queries used to match, and the reel ran over a showcase
+    // the stylesheet had already stacked.
+    const wide = window.matchMedia('(min-width: 901px) and (min-height: 560px)')
     const sync = () => setEnabled(!motion.matches && wide.matches)
     sync()
     motion.addEventListener('change', sync)

@@ -842,14 +842,42 @@ body.reel-active .site-footer { display: none; }
 }
 
 /* ---------- Responsive ---------- */
+/* ============================================================================
+   Responsive tiers
+
+     PC       >= 901px   everything above this comment, and the only tier that
+                         runs the reel
+     Tablet   <= 900px   two-column layouts collapse to one
+     Mobile   <= 600px   sized for a 375-430px window
+
+   The tiers cascade; they are not exclusive ranges. Mobile inherits everything
+   Tablet sets and states only what it needs to change, so a value that suits
+   both lives in Tablet alone and appears once.
+
+   901 rather than 900 is deliberate. RopeReel engages on (min-width: 901px),
+   which is the same line drawn from the other side: at exactly 900px the two
+   used to both match, so the reel ran while these rules had already stacked the
+   showcase underneath it. One boundary, stated in both places.
+
+   Height is handled separately and does not belong to a tier: the reel also
+   needs (min-height: 560px), and its type ramps on vh — see the clamp block up
+   in the reel section.
+   ============================================================================ */
+
+/* ---------------------------- Tablet: <= 900px --------------------------- */
 @media (max-width: 900px) {
+  /* Header is untouched here — its content is about 510px wide and fits from
+     601px up. It gets dealt with in Mobile. */
+
+  /* Hero */
   .hero { grid-template-columns: 1fr; padding-top: 48px; }
   .hero__title { font-size: 48.4px; }
-  /* Stacked, clip first: the picture is what identifies a block, and on a phone
-     it has to arrive before the reader decides whether to keep going. Source
-     order stays text-then-media so reading and tab order are unchanged — the
-     swap is a one-column area list, not `order`, for the same reason the
-     two-column flip is. The flip has nothing left to flip. */
+
+  /* Showcase — stacked, clip first: the picture is what identifies a block, and
+     once the columns collapse it has to arrive before the reader decides
+     whether to keep scrolling. Done with a one-column area list rather than
+     `order`, so reading and tab order are unchanged — the same reason the
+     two-column flip avoids `order`. The flip has nothing left to flip. */
   .showcase__row,
   .showcase__row--flip {
     grid-template-columns: minmax(0, 1fr);
@@ -869,14 +897,18 @@ body.reel-active .site-footer { display: none; }
   .showcase__rows { gap: 28px; }
   .showcase { padding: 16px; }
   .reel--static .reel__panel { padding: 24px; }
-  /* The closing panel is the last thing on the page, and three paddings stacked
-     under it: its own, its 96px bottom margin — a desktop value, sized for a
-     long scrolling page — and the panel's. That put 168px of nothing between
-     the support address and the footer rule. */
-  .cta { padding: 32px 24px; margin: 16px auto 20px; }
-  /* 35.2px is a desktop display size; at this width it wraps and towers over
-     the block it introduces. */
+
+  /* Shared heading — 35.2px is a desktop display size; at this width it wraps
+     and towers over the block it introduces. Used by both showcase and cta. */
   .section-title { font-size: 26px; margin-bottom: 14px; }
+
+  /* Closing panel — the last thing on the page, with three paddings stacked
+     under it: its own, its 96px bottom margin (a desktop value, sized for a
+     long scrolling page) and the panel's. That put 168px of nothing between the
+     support address and the footer rule. */
+  .cta { padding: 32px 24px; margin: 16px auto 20px; }
+
+  /* Docs */
   .docs-layout { grid-template-columns: 1fr; }
   .sidebar {
     position: static;
@@ -886,14 +918,14 @@ body.reel-active .site-footer { display: none; }
   }
 }
 
-/* Phones. The block above collapses the two-column layouts; this one deals with
-   what is still sized for a laptop once the window is 375-430px wide. The reel
-   is not a concern here — RopeReel only engages above 900px, so a phone always
-   gets the plain scrolling fallback. */
+/* ---------------------------- Mobile: <= 600px --------------------------- */
+/* Only what Tablet does not already cover, or covers at the wrong size for a
+   375-430px window. The reel never appears at this width, so nothing here has
+   to think about it. */
 @media (max-width: 600px) {
-  /* The header wanted roughly 510px of content in a 375px window: brand mark,
-     name, engine badge, and three nav links. The badge goes first because it is
-     the only thing in the bar that is not navigation, and the engine range is
+  /* Header — wanted roughly 510px of content in a 375px window: brand mark,
+     name, engine badge and three nav links. The badge goes first, being the
+     only thing in the bar that is not navigation, and the engine range is
      stated on Requirements and in the closing panel's spec list anyway. */
   .site-header__inner { padding: 0 16px; }
   .brand { gap: 8px; }
@@ -902,6 +934,7 @@ body.reel-active .site-footer { display: none; }
   .site-nav { gap: 2px; }
   .site-nav__link { padding: 7px 9px; font-size: 13px; }
 
+  /* Hero */
   .hero { padding: 40px 16px 32px; gap: 32px; }
   .hero__title { font-size: 36px; }
   .hero__tagline { font-size: 19px; }
@@ -910,16 +943,19 @@ body.reel-active .site-footer { display: none; }
      clipped rather than reachable. */
   .hero__actions { flex-wrap: wrap; }
 
-  /* Tighter again on a phone, where the same spacing eats a larger share of a
-     shorter screen. Only the side padding differs from the block above; the
-     vertical values just carry the reduction a step further. */
+  /* Showcase — the same spacing Tablet sets eats a larger share of a shorter
+     screen, so the vertical values carry the reduction one step further and the
+     side padding comes in to match. */
   .showcase { padding: 12px; }
   .showcase__rows { gap: 24px; }
   .reel--static .reel__panel { padding: 20px; }
-  .section-title { font-size: 22px; margin-bottom: 12px; }
   .showcase__heading { font-size: 21px; }
   .showcase__body { font-size: 15px; }
 
+  /* Shared heading */
+  .section-title { font-size: 22px; margin-bottom: 12px; }
+
+  /* Closing panel */
   .cta { padding: 28px 16px; margin: 12px auto 16px; }
   .cta__lead { font-size: 16.5px; }
   /* Label above value instead of beside it. The two-column grid gave the values
@@ -929,6 +965,7 @@ body.reel-active .site-footer { display: none; }
   .cta__spec dt { margin-top: 12px; }
   .cta__spec dt:first-of-type { margin-top: 0; }
 
+  /* Docs */
   .docs-layout { padding: 0 16px; }
   .docs-main { padding: 28px 0 56px; }
   .doc__title { font-size: 30px; }
