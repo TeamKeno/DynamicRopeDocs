@@ -81,8 +81,15 @@ export const SHOWCASE = [
         eyebrow: 'Collision',
         heading: 'It wraps onto whatever you throw it at',
         body:
-          'Characters, static props, elevators — the rope treats them all alike, and a moving surface drags it along. It can even be owned by one actor and wrap a bone on another. Four collision techniques underneath, picked per rope.',
-        points: ['A single wrap can span several bones', 'Nothing tunnels through at speed'],
+          'Characters, static props, elevators — the rope treats them all alike, and a moving surface drags it along. It can even be owned by one actor and wrap a bone on another. Four collision techniques underneath, picked per target.',
+        // "per rope" was wrong: the capsule and SDF providers are components on
+        // the target, so the technique is chosen per thing being wrapped, not
+        // per rope. "Nothing tunnels" was an absolute guarantee; the mechanism
+        // is substep swept CCD, so it says that instead.
+        points: [
+          'A single wrap can span several bones',
+          'Swept contact keeps a fast rope from passing through',
+        ],
         media: null,
         mediaHint: 'Rope dragged across a moving platform and a bone capsule',
       },
@@ -92,7 +99,13 @@ export const SHOWCASE = [
         heading: 'The line goes tight, and both ends feel it',
         body:
           'The rope has a real length. When it runs out neither end can walk through it, and the rope reports how hard it is being pulled. Pull something too heavy and it pulls you in instead.',
-        points: ['Tension is a number you can build on', 'Climb in when the target is too heavy'],
+        // The second bullet used to be "Climb in when the target is too heavy",
+        // which is the body's last sentence said twice. Auto-release is a real
+        // setting (TensionReleaseForce / TensionReleaseTime) and is new here.
+        points: [
+          'Tension is a number you can build on',
+          'Set a tension limit and the rope lets go on its own',
+        ],
         media: null,
         mediaHint: 'Pull gauge filling, then climb-in on a heavy target',
       },
@@ -147,9 +160,12 @@ export const SHOWCASE = [
         heading: 'Wired for a real game, not a demo',
         body:
           'Throw and pull are already on input, the aim crosshair and pull gauge are already drawn, and the throw and the pull are already marked on the animation timeline. Caught characters can go ragdoll on contact.',
+        // The notify bullet repeated the body's "marked on the animation
+        // timeline". The wrap camera is a shipped opt-in feature the landing
+        // never mentioned, so it takes the slot.
         points: [
           'One component on the character that holds the rope',
-          'Anim notifies fire the throw and open the pull window',
+          'An opt-in camera cuts to the catch for a beat',
         ],
         media: null,
         mediaHint: 'Full input loop from a player camera, HUD visible',
@@ -159,8 +175,16 @@ export const SHOWCASE = [
         eyebrow: 'Performance',
         heading: 'The whole simulation runs on the GPU',
         body:
-          'Solving, contact detection and tube building all happen on the graphics card, and the rope state stays there between frames — so your ropes are not spending game-thread time. Cooking, servers and -nullrhi fall back to CPU on their own.',
-        points: ['XPBD solver and tube builder on RDG compute', 'The fallback needs no configuration'],
+          'Solving, contact detection and tube building all happen on the graphics card, and the rope state stays there between frames — so your ropes are not spending game-thread time. Cooking, servers, -nullrhi and ropes over the node cap fall back to the CPU on their own.',
+        // The node cap belongs in that list. It is the only CPU case that can
+        // happen during normal play, and leaving it out let the sentence read
+        // as "the CPU path is for cooks and servers" when a big enough rope
+        // takes it too. "The fallback needs no configuration" then said "on
+        // their own" a second time, so the slot went to the force-CPU toggle.
+        points: [
+          'XPBD solver and tube builder on RDG compute',
+          'One console command forces the CPU path for comparison',
+        ],
         media: null,
         mediaHint: 'A crowd of ropes running at once',
       },
