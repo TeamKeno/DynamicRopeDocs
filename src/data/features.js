@@ -62,11 +62,17 @@ export const SHOWCASE = [
       },
       {
         id: 'wrap-modes',
-        eyebrow: 'Resolve modes',
+        eyebrow: 'Wrap modes',
         heading: 'Decide how much a throw can miss',
         body:
           'Full Simulation lets physics decide, and the throw can miss. Assisted always reaches the target but decides whether the wrap holds. Guaranteed catches what you aimed at. After the catch, all three behave the same.',
-        points: ['Set per rope — a boss grapple can differ', 'Swap at runtime to tune difficulty'],
+        // "a boss grapple can differ" left the comparison dangling — differ from
+        // what? — and "grapple" appears nowhere else here, while the plugin's
+        // only use of the word is an elevator cable biting a ceiling anchor.
+        // The rule (ResolveMode is a per-component UPROPERTY) is the part a
+        // buyer needs, so the bullet states it and lets the body's three modes
+        // supply the example.
+        points: ['Set per rope, so one game can mix all three', 'Swap at runtime to tune difficulty'],
         media: null,
         mediaHint: 'Same throw in all three modes, side by side',
       },
