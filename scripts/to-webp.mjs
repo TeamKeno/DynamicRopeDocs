@@ -11,22 +11,35 @@
 // the path features.js references (without a leading slash — see lib/asset.js).
 
 import { readdirSync, statSync, mkdirSync, existsSync, readFileSync, writeFileSync } from 'node:fs'
+import { createHash } from 'node:crypto'
 import { join, parse } from 'node:path'
 import sharp from 'sharp'
 
+const hash = (file) => createHash('sha1').update(readFileSync(file)).digest('hex')
+
 const SRC = 'media-src'
 const OUT = 'public/media'
-// Records the mtime this script gave each output, so the next run can tell its
+// Records a hash of each output this script wrote, so the next run can tell its
 // own work from a file someone else put there. Lives beside the originals, so
 // it is gitignored along with them.
+//
+// Content, not mtime: a checkout or a merge rewrites public/media/ and moves
+// every mtime, which made an earlier version of this check fire on all five
+// files after an ordinary `git merge`. Git restores the same bytes, so a hash
+// stays put through that while still catching a genuinely different file.
 const MANIFEST = join(SRC, '.manifest.json')
 
 // Lossy WebP goes after fine glyphs before it touches anything else, and these
 // two shots exist to be read: the bake panel's settings and the debugger's
-// solve= line. Everything else is a 3D render with no text in it, where q80 is
-// indistinguishable and roughly a quarter of the bytes.
-const LOSSLESS = new Set(['Authoring', 'Debugging'])
+// solve= line. They were lossless at first, which was the safe guess and an
+// expensive one -- 370KB and 650KB against 37KB for a render. Encoded at both
+// and compared at 1:1, q90 is indistinguishable from lossless on either, while
+// q80 does visibly mush the low-contrast grey rows (particles=, registered=).
+// So text shots get q90, and everything else -- 3D renders with no glyphs in
+// them -- stays at q80.
+const TEXT = new Set(['Authoring', 'Debugging'])
 const QUALITY = 80
+const QUALITY_TEXT = 90
 
 // Frames fill with object-fit: cover, so anything off-ratio loses its edges
 // rather than letterboxing. The hero frame is taller than the showcase rows.
@@ -54,8 +67,8 @@ const manifest = existsSync(MANIFEST) ? JSON.parse(readFileSync(MANIFEST, 'utf8'
 // into public/media/ is the easy mistake: this script would overwrite it with
 // the stale original and the new shot would be gone. "Output newer than source"
 // cannot detect that — after any successful run every output is newer than its
-// source. What does detect it is the output having changed since *this script*
-// last wrote it.
+// source. What does detect it is the output's contents having changed since
+// *this script* last wrote them.
 //
 // This runs as its own pass so that bailing out really does leave everything
 // alone. Checking inside the convert loop would already have rewritten whatever
@@ -66,7 +79,7 @@ const tampered = inputs
     (name) =>
       existsSync(join(OUT, `${name}.webp`)) &&
       manifest[name] !== undefined &&
-      statSync(join(OUT, `${name}.webp`)).mtimeMs !== manifest[name],
+      hash(join(OUT, `${name}.webp`)) !== manifest[name],
   )
 
 if (tampered.length) {
@@ -88,7 +101,7 @@ for (const file of inputs.sort()) {
   const { name } = parse(file)
   const src = join(SRC, file)
   const out = join(OUT, `${name}.webp`)
-  const lossless = LOSSLESS.has(name)
+  const quality = TEXT.has(name) ? QUALITY_TEXT : QUALITY
 
   const image = sharp(src)
   const { width, height } = await image.metadata()
@@ -102,16 +115,16 @@ for (const file of inputs.sort()) {
     )
   }
 
-  await image.webp(lossless ? { lossless: true } : { quality: QUALITY }).toFile(out)
+  await image.webp({ quality }).toFile(out)
 
   const inBytes = statSync(src).size
   const outBytes = statSync(out).size
-  manifest[name] = statSync(out).mtimeMs
+  manifest[name] = hash(out)
   totalIn += inBytes
   totalOut += outBytes
   const kb = (n) => `${(n / 1024).toFixed(0)}KB`
   console.log(
-    `${name.padEnd(14)} ${(lossless ? 'lossless' : `q${QUALITY}`).padEnd(9)} ` +
+    `${name.padEnd(14)} ${`q${quality}`.padEnd(9)} ` +
       `${kb(inBytes).padStart(7)} -> ${kb(outBytes).padStart(7)}`,
   )
 }
