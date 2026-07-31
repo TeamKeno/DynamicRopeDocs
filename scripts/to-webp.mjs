@@ -40,6 +40,25 @@ const MANIFEST = join(SRC, '.manifest.json')
 const TEXT = new Set(['Authoring', 'Debugging', 'StressTest'])
 const QUALITY = 80
 const QUALITY_TEXT = 90
+// StressTest is a clip rather than a still, and a lossy frame every 80ms adds up
+// where a single one does not: at q90 it is 5.6MB and at q70 it is 1.8MB, over
+// seven seconds in which nothing holds still long enough to be studied. The text
+// in it stays legible because the crop below keeps it near its captured size.
+const QUALITY_CLIP = 70
+
+// Two things arrive wrong in a capture and are worth fixing here rather than by
+// hand: a grab taken in a window rather than fullscreen is letterboxed, and a
+// clip is captured at whatever the window was rather than at the width it will
+// be displayed. Doing it in the script is what makes `npm run media` reproduce
+// what the site serves -- prepared by hand, the next run would quietly replace
+// the shot with the raw grab it was made from.
+//
+// `crop` is in the source's own pixels; `width` is what to scale to afterwards.
+// 800 is the doc measure (.doc max-width), so the clip is served at the size it
+// is drawn at and the browser scales nothing.
+const PREPARE = {
+  StressTest: { crop: { left: 456, top: 176, width: 996, height: 792 }, width: 800 },
+}
 
 // Frames fill with object-fit: cover, so anything off-ratio loses its edges
 // rather than letterboxing. The hero frame is taller than the showcase rows.
@@ -106,21 +125,38 @@ for (const file of inputs.sort()) {
   const { name } = parse(file)
   const src = join(SRC, file)
   const out = join(OUT, `${name}.webp`)
-  const quality = TEXT.has(name) ? QUALITY_TEXT : QUALITY
+  const prepare = PREPARE[name]
 
-  const image = sharp(src)
-  const { width, height } = await image.metadata()
+  // `animated` makes sharp read every frame instead of only the first, which is
+  // the difference between re-encoding a clip and silently flattening it to its
+  // opening frame. A still has one page, so this costs nothing to pass always.
+  // It does change what metadata reports: `height` becomes the height of all the
+  // frames stacked, and `pageHeight` is the one frame's height.
+  const image = sharp(src, { animated: true })
+  const { width, height, pageHeight, pages = 1 } = await image.metadata()
+  const frameHeight = pageHeight ?? height
+  const quality = pages > 1 ? QUALITY_CLIP : TEXT.has(name) ? QUALITY_TEXT : QUALITY
 
+  // Ratio is checked on what gets served, so after the crop rather than before:
+  // a letterboxed grab is the wrong shape by definition, and warning about the
+  // shape of something already being fixed says nothing.
+  const shownW = prepare?.crop?.width ?? width
+  const shownH = prepare?.crop?.height ?? frameHeight
   const expected = RATIOS[name] ?? DEFAULT_RATIO
-  const actual = width / height
+  const actual = shownW / shownH
   if (!UNFRAMED.has(name) && Math.abs(actual - expected) > RATIO_TOLERANCE) {
     warnings.push(
-      `${name}: ${width}x${height} is ${actual.toFixed(3)}, wanted ${expected.toFixed(3)} — ` +
+      `${name}: ${shownW}x${shownH} is ${actual.toFixed(3)}, wanted ${expected.toFixed(3)} — ` +
         `object-fit: cover will crop it`,
     )
   }
 
-  await image.webp({ quality }).toFile(out)
+  // extract() and resize() both act per frame on an animated input, so a clip
+  // comes out with its frame count and timing intact.
+  let pipeline = image
+  if (prepare?.crop) pipeline = pipeline.extract(prepare.crop)
+  if (prepare?.width) pipeline = pipeline.resize({ width: prepare.width })
+  await pipeline.webp({ quality }).toFile(out)
 
   const inBytes = statSync(src).size
   const outBytes = statSync(out).size

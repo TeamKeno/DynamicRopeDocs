@@ -936,10 +936,10 @@ Rope->HadLogicOverrideThisFrame();  // a logic phase produced node overrides
         </p>
         <Figure
           src="media/StressTest.webp"
-          width={996}
-          height={792}
-          alt="The stress-test map: thirty ropes hanging and swinging around a mannequin, with the input legend and a frame-time readout overlaid."
-          caption="01_StressTest — 30 ropes, SDF collision, all of them on the GPU path."
+          width={800}
+          height={636}
+          alt="Seven seconds of the stress-test map: a character runs through a field of thirty ropes that swing, drag along the floor and settle, with the input legend and a live frame-time readout overlaid."
+          caption="01_StressTest — 30 ropes, SDF collision, all of them on the GPU path. The readout in the corner is the whole frame, not the rope work."
         />
         <PropTable
           columns={['Test environment', 'Value']}

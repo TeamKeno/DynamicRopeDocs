@@ -43,6 +43,13 @@ export function CodeBlock({ code, language }) {
  * `src` is a path under public/, written without a leading slash (see
  * lib/asset.js). Pass the pixel dimensions so the browser reserves the space
  * before the file arrives and the prose below does not jump.
+ *
+ * An animated WebP works here and plays on its own, which is why the media
+ * script scales clips down to the doc measure and encodes them harder than it
+ * does stills: an <img> gives the reader no way to pause one, so its whole
+ * weight is spent whether they watch it or not. Anything longer or heavier than
+ * a few seconds belongs in a <video> with the showcase's visibility handling
+ * rather than here.
  */
 export function Figure({ src, alt, caption, width, height }) {
   return (
