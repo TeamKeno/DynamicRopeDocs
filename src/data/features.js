@@ -111,7 +111,7 @@ export const SHOWCASE = [
           type: 'image',
           src: 'media/WrapMode.webp',
           alt:
-            'A three-panel diagram. First, the thrown rope arcs past a figure without touching it. Second, an aim line runs straight to the figure and the rope coils round its torso with a loose tail hanging. Third, the rope follows a guide line and winds tightly round the torso.',
+            'A three-panel diagram. First, the thrown rope arcs past a figure without touching it. Second, the rope runs to a marked point on the figure and coils round the torso, leaving a loose tail. Third, the rope runs straight to the marked point and closes on it exactly.',
         },
         mediaHint: 'Same throw in all three modes, side by side',
       },
