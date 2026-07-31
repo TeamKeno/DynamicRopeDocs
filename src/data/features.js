@@ -77,7 +77,12 @@ export const SHOWCASE = [
           'Works with your existing skeleton',
           'Let go while it is still wrapping and it unwinds — no snag, no jolt',
         ],
-        media: null,
+        media: {
+          type: 'image',
+          src: 'media/CoreLoop.webp',
+          alt:
+            'Seen from above: a standing character holds a rope that runs down to a second character collapsed face-down on the floor, still wound around their waist.',
+        },
         mediaHint: 'Throw → wrap → hold, one continuous take',
       },
       {
@@ -93,7 +98,16 @@ export const SHOWCASE = [
         // buyer needs, so the bullet states it and lets the body's three modes
         // supply the example.
         points: ['Set per rope, so one game can mix all three', 'Swap at runtime to tune difficulty'],
-        media: null,
+        // A diagram rather than a capture, on purpose: the claim here is about
+        // three different outcomes of the same throw, and staging that as
+        // something that looks like gameplay would be showing a buyer behaviour
+        // they cannot check. Read left to right it follows the body's order.
+        media: {
+          type: 'image',
+          src: 'media/WrapMode.webp',
+          alt:
+            'A three-panel diagram. First, the thrown rope arcs past a figure without touching it. Second, an aim line runs straight to the figure and the rope coils round its torso with a loose tail hanging. Third, the rope follows a guide line and winds tightly round the torso.',
+        },
         mediaHint: 'Same throw in all three modes, side by side',
       },
     ],
