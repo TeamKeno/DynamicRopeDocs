@@ -489,7 +489,22 @@ body.reel-active .site-footer { display: none; }
   --showcase-media-h: min(var(--showcase-row-h), calc(42vw * 9 / 16));
   --showcase-media-w: calc(var(--showcase-media-h) * 16 / 9);
 }
-.reel:not(.reel--static) .showcase .section-title { font-size: 28.6px; margin-bottom: 20px; }
+/* Type that answers to viewport height, because a reel panel is exactly one
+   viewport tall and clips whatever will not fit (.reel is overflow: hidden, and
+   .showcase__text is too). Fixed sizes were fine until the type went up 10% and
+   a short window started losing the last bullet of a row.
+
+   Each value is clamp(floor, calc(base + slope·vh), ceiling), and every ceiling
+   is the size that was already there — nothing grows, a roomy window looks
+   exactly as it did. The ramp is fitted to the window the reel actually runs in:
+   RopeReel only engages above (min-width: 900px) and (min-height: 560px), so
+   each rule reaches its ceiling at 900px tall and its floor near 560px, where
+   the reel hands over to the plain scrolling fallback anyway. Below that
+   .reel--static takes these rules out of play and nothing is clipped. */
+.reel:not(.reel--static) .showcase .section-title {
+  font-size: clamp(21px, calc(8.5px + 2.24vh), 28.6px);
+  margin-bottom: 20px;
+}
 /* A stated row height rather than a fraction of the container. Fractions would
    tie a block's size to how many blocks its group happens to hold — a group of
    one would stretch to the whole panel and its clip would tower over the rest.
@@ -522,10 +537,31 @@ body.reel-active .site-footer { display: none; }
   height: var(--showcase-media-h);
 }
 .reel:not(.reel--static) .showcase__text { min-height: 0; overflow: hidden; }
-.reel:not(.reel--static) .showcase__heading { font-size: 24.2px; margin-bottom: 8px; }
-.reel:not(.reel--static) .showcase__body { font-size: 15.4px; }
+.reel:not(.reel--static) .showcase__heading {
+  font-size: clamp(19px, calc(10.4px + 1.53vh), 24.2px);
+  margin-bottom: 8px;
+}
+.reel:not(.reel--static) .showcase__body { font-size: clamp(12.6px, calc(8px + 0.82vh), 15.4px); }
+.reel:not(.reel--static) .showcase__eyebrow { font-size: clamp(11.2px, calc(7.9px + 0.59vh), 13.2px); }
+.reel:not(.reel--static) .showcase__points li {
+  font-size: clamp(12.4px, calc(8.4px + 0.72vh), 14.85px);
+}
 .reel:not(.reel--static) .showcase__points { margin-top: 10px; }
 .reel:not(.reel--static) .cta { margin: 0 auto; }
+
+/* The hero and the closing panel are clipped by the same overflow, so they ramp
+   on the same rule: ceiling = the size a 900px-tall window already showed,
+   floor = still readable at the 560px where the reel gives up. */
+.reel:not(.reel--static) .hero__title { font-size: clamp(42px, calc(2.5px + 7.06vh), 66px); }
+.reel:not(.reel--static) .hero__tagline { font-size: clamp(18.5px, calc(9.1px + 1.68vh), 24.2px); }
+.reel:not(.reel--static) .hero__lead { font-size: clamp(14.5px, calc(9.4px + 0.91vh), 17.6px); }
+.reel:not(.reel--static) .hero__eyebrow { font-size: clamp(12px, calc(8.2px + 0.68vh), 14.3px); }
+.reel:not(.reel--static) .cta .section-title {
+  font-size: clamp(26px, calc(10.9px + 2.71vh), 35.2px);
+}
+.reel:not(.reel--static) .cta__lead { font-size: clamp(15px, calc(8.9px + 1.09vh), 18.7px); }
+.reel:not(.reel--static) .cta__spec { font-size: clamp(12.8px, calc(8.5px + 0.76vh), 15.4px); }
+.reel:not(.reel--static) .cta__meta { font-size: clamp(12px, calc(8.2px + 0.68vh), 14.3px); }
 
 /* Fallback: ordinary scrolling page. */
 .reel--static { height: auto; overflow: visible; }
