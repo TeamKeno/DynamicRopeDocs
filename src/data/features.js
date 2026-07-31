@@ -55,7 +55,12 @@
  * sequence is the core-loop block's job one panel down, and showing it twice
  * spends the hero on something the reader is about to see anyway.
  */
-export const HERO_MEDIA = null
+export const HERO_MEDIA = {
+  type: 'image',
+  src: 'media/DynamicRope_Shorts.webp',
+  alt:
+    'A pale mannequin stands holding a red rope that runs taut across an empty plain to a second, armoured character braced low at the far end with the line wound around them.',
+}
 export const HERO_MEDIA_HINT = 'A wrapped character being dragged, 3/4 angle'
 
 export const SHOWCASE = [
