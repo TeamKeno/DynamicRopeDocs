@@ -920,6 +920,10 @@ body.reel-active .site-footer { display: none; }
      the contents stay reachable from anywhere on a long page rather than only
      from the top. */
   .docs-layout { grid-template-columns: 1fr; }
+  /* Half the desktop gap above the title. The Contents button now sits on its
+     own row above this, so the old 40px was measured from something that is no
+     longer directly overhead. */
+  .docs-main { padding-top: 20px; }
   .docs-nav-toggle {
     display: inline-flex;
     align-items: center;
@@ -976,7 +980,7 @@ body.reel-active .site-footer { display: none; }
   .site-nav__link { padding: 7px 9px; font-size: 13px; }
 
   /* Hero */
-  .hero { padding: 40px 16px 32px; gap: 32px; }
+  .hero { padding: 20px 16px 32px; gap: 32px; }
   .hero__title { font-size: 36px; }
   .hero__tagline { font-size: 19px; }
   .hero__lead { font-size: 15px; }
@@ -1008,7 +1012,7 @@ body.reel-active .site-footer { display: none; }
 
   /* Docs */
   .docs-layout { padding: 0 16px; }
-  .docs-main { padding: 28px 0 56px; }
+  .docs-main { padding: 14px 0 56px; }
   .doc__title { font-size: 30px; }
   .doc__body { font-size: 15.5px; }
   .doc__body h2 { font-size: 20px; }
