@@ -256,7 +256,7 @@ export const DOCS = {
             you but still judges the bind, which is the most game-like default.
           </li>
           <li>
-            Optionally tune <strong>Node Count</strong> (72 by default, max 512) and{' '}
+            Optionally tune <strong>Node Count</strong> (64 by default, max 512) and{' '}
             <strong>Rope Length</strong> (600&nbsp;cm by default).
           </li>
         </ol>
@@ -1444,10 +1444,10 @@ Rope->GetSolverLODScale();`}
         <PropTable
           rows={[
             ['Wrap Mode', 'Assisted (Judged)', 'The rope’s contract from throw to bind.'],
-            ['Node Count', '72', 'Simulated particles. Max 512 (the GPU thread-group limit). Init-time only.'],
+            ['Node Count', '64', 'Simulated particles. Max 512 (the GPU thread-group limit). Init-time only.'],
             ['Rope Length', '600 cm', 'Initial and maximum length. Init-time only; runtime changes go through SetRopeLength.'],
             ['Min Rope Length', '100 cm', 'The shortest reeling in can reach.'],
-            ['Reel Speed', '150 cm/s', 'The rate the wielder’s reel inputs use.'],
+            ['Reel Speed', '300 cm/s', 'The rate the wielder’s reel inputs use.'],
             ['Rope Radius', '2 cm', 'Visual tube radius. Also the source for the auto-derived collision radii.'],
             ['Sides', '8', 'Tube cross-section sides.'],
             ['Smoothing Subdivisions', '1 (off)', 'Render-only Catmull-Rom subdivision per segment.'],
@@ -1485,7 +1485,7 @@ Rope->GetSolverLODScale();`}
           rows={[
             ['Frame Mode', 'Owner', 'Where the throw direction comes from — Owner, OwnerCamera or Custom.'],
             ['Swing Plane', 'Aim And Frame Up', 'The plane the whip swings in.'],
-            ['Throw Speed', '1500 cm/s', 'Initial tip speed.'],
+            ['Throw Speed', '1000 cm/s', 'Initial tip speed.'],
             ['Return If No Contact', '0 s (off)', 'Auto-return the rope if flight makes no contact within this time.'],
             ['Tip Velocity Boost', '1.0', 'Extra speed weighting toward the tip.'],
             ['Motion Inheritance', '5.0', 'How much owner and hand-animation velocity is inherited.'],
