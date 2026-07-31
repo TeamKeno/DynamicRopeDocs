@@ -1312,6 +1312,15 @@ Rope.Ragdoll.Destroy   // destroy the target, to exercise the mid-wrap loss path
           automatically.
         </p>
         <p>
+          <strong>Rope</strong> reports on one rope — the one on the debugger’s current target actor,
+          which it names at the head of its output (<code>Rope@BP_ThirdPersonCharacter_C_0</code>). So
+          when you are reading the wrong rope, the target is what to change, and that is the engine’s own
+          binding rather than anything the plugin adds: hold the apostrophe to pick the pawn you are
+          looking at, or hold <strong>Shift + apostrophe</strong> to snap back to the local player. The
+          debugger prints both across the top of the screen while it is open.{' '}
+          <strong>RopePerf</strong> is world-wide and does not care which actor is selected.
+        </p>
+        <p>
           While the <strong>Rope</strong> category is active, these keys toggle sub-views — no console
           variables involved:
         </p>
