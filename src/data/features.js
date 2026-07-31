@@ -155,7 +155,12 @@ export const SHOWCASE = [
         body:
           'Voxel size, precision, detection band, how thin a bone must be before it is skipped — every knob is exposed with its trade-off spelled out. Adjust, hit Bake, and the preview updates. Sharper surface or smaller asset — you decide.',
         points: ['One button, with progress you can cancel', 'The asset remembers your last settings'],
-        media: null,
+        media: {
+          type: 'image',
+          src: 'media/Authoring.webp',
+          alt:
+            'The Rope SDF Authoring panel beside a viewport: bake settings for voxel size, narrow band and minimum bone girth on the left, and a character mesh overlaid with the baked distance field as a red-to-blue slice heatmap on the right.',
+        },
         mediaHint: 'Editor: nudge voxel size, hit Bake, preview sharpens',
       },
       {
