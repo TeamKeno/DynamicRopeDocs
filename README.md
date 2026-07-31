@@ -41,6 +41,20 @@ would 404 once deployed — see the comment in `src/lib/asset.js`.
 Frames are cropped to fill (`object-fit: cover`), so shoot to the ratio:
 **16:9** (1280x720) for the showcase rows, **16:11** (1280x880) for the hero.
 
+### Adding a shot
+
+Drop the original in `media-src/` named for its slot (`Debugging.png`), then:
+
+```sh
+npm run media     # media-src/ -> public/media/*.webp, and reports the sizes
+```
+
+`media-src/` is gitignored and holds the pristine capture; `public/media/` is
+what ships and is committed. Re-encoding from the original each time avoids
+compressing an already-lossy file twice. The script warns when a shot is off
+the ratio its frame expects, and encodes lossless only for the shots whose
+value is legible text — see `LOSSLESS` in `scripts/to-webp.mjs`.
+
 ## Editing content
 
 - **Add / edit a doc page:** add an entry to `src/data/docs.jsx` and register its slug in

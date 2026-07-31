@@ -4,3 +4,7 @@ dist-ssr
 *.local
 .vite
 .DS_Store
+
+# Media originals: pristine captures, re-encoded into public/media by `npm run media`.
+# Kept out of git — a binary in history cannot be taken back out.
+media-src
