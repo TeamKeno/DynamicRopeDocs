@@ -900,8 +900,12 @@ body.reel-active .site-footer { display: none; }
      is the top of the next one, which is the useful signal that there is more.
      The gap alone now decides the rhythm, so it goes back up to a real value. */
   .showcase__rows { gap: 28px; }
-  .showcase { padding: 16px; }
-  .reel--static .reel__panel { padding: 24px; }
+  /* Section to section is these two paddings meeting: the panel's and the
+     showcase's, twice over. Only the vertical halves — the horizontal figure is
+     the side margin holding content off the screen edge, and shrinking it would
+     narrow the page rather than tighten the rhythm. 8+12+12+8 = 40px, from 80. */
+  .showcase { padding: 8px 16px; }
+  .reel--static .reel__panel { padding: 12px 24px; }
 
   /* Shared heading — 35.2px is a desktop display size; at this width it wraps
      and towers over the block it introduces. Used by both showcase and cta. */
@@ -987,18 +991,27 @@ body.reel-active .site-footer { display: none; }
   /* Both buttons fit at 375px but not at 320px, and an overflowing row would be
      clipped rather than reachable. */
   .hero__actions { flex-wrap: wrap; }
+  /* 20% off the shared .btn box, the hero's pair only — they are the one place
+     two of them share a line at this width. The closing panel's single button
+     has the row to itself and keeps full size. */
+  .hero__actions .btn {
+    padding: 8.8px 16px;
+    border-radius: 8px;
+    font-size: 13.2px;
+  }
 
   /* Showcase — the same spacing Tablet sets eats a larger share of a shorter
      screen, so the vertical values carry the reduction one step further and the
      side padding comes in to match. */
-  .showcase { padding: 12px; }
+  /* Same split as Tablet, one step tighter: 6+10+10+6 = 32px, from 64. */
+  .showcase { padding: 6px 12px; }
   .showcase__rows { gap: 24px; }
-  .reel--static .reel__panel { padding: 20px; }
-  .showcase__heading { font-size: 21px; }
+  .reel--static .reel__panel { padding: 10px 20px; }
+  .showcase__heading { font-size: 19px; }
   .showcase__body { font-size: 15px; }
 
   /* Shared heading */
-  .section-title { font-size: 22px; margin-bottom: 12px; }
+  .section-title { font-size: 22px; margin-bottom: 20px; }
 
   /* Closing panel */
   .cta { padding: 28px 16px; margin: 12px auto 16px; }
@@ -1012,8 +1025,8 @@ body.reel-active .site-footer { display: none; }
 
   /* Docs */
   .docs-layout { padding: 0 16px; }
-  .docs-main { padding: 14px 0 56px; }
-  .doc__title { font-size: 30px; }
+  .docs-main { padding: 0px 0 28px; }
+  .doc__title { font-size: 28px; }
   .doc__body { font-size: 15.5px; }
   .doc__body h2 { font-size: 20px; }
   /* Side by side, the two pager buttons shrink past their own titles: they are
