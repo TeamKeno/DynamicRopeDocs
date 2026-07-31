@@ -110,13 +110,13 @@ code {
   display: inline-block;
   color: var(--accent);
   font-weight: 600;
-  font-size: 13px;
+  font-size: 14.3px;
   letter-spacing: 0.04em;
   text-transform: uppercase;
   margin-bottom: 14px;
 }
 .hero__title {
-  font-size: 60px;
+  font-size: 66px;
   line-height: 1.02;
   /* Leading this tight puts the baseline close enough to the bottom of the line
      box that descenders hang outside it — about 6px of the y and the p at this
@@ -133,8 +133,8 @@ code {
   background-clip: text;
   color: transparent;
 }
-.hero__tagline { font-size: 22px; font-weight: 600; margin: 0 0 16px; }
-.hero__lead { color: var(--text-dim); font-size: 16px; max-width: 46ch; }
+.hero__tagline { font-size: 24.2px; font-weight: 600; margin: 0 0 16px; }
+.hero__lead { color: var(--text-dim); font-size: 17.6px; max-width: 46ch; }
 .hero__actions { display: flex; gap: 12px; margin-top: 28px; }
 .hero__visual {
   aspect-ratio: 16 / 11;
@@ -149,7 +149,7 @@ code {
   /* So media fills the frame without spilling past the rounded corners. */
   overflow: hidden;
 }
-.hero__visual-placeholder { color: var(--text-faint); font-size: 14px; text-align: center; padding: 0 16px; }
+.hero__visual-placeholder { color: var(--text-faint); font-size: 15.4px; text-align: center; padding: 0 16px; }
 /* The frame is 16/11 while the showcase frames are 16/9, so a 16/9 hero shot
    gets centre-cropped at the sides. Keep the subject centred when shooting. */
 .hero__visual-media {
@@ -166,7 +166,7 @@ code {
   padding: 11px 20px;
   border-radius: 10px;
   font-weight: 600;
-  font-size: 15px;
+  font-size: 16.5px;
   border: 1px solid transparent;
   cursor: pointer;
   transition: background-color 0.15s, border-color 0.15s, color 0.15s;
@@ -183,12 +183,12 @@ code {
 .btn--primary:hover { background: var(--text); color: var(--bg); }
 .btn--ghost { border-color: var(--border); color: var(--text); }
 .btn--ghost:hover { background: var(--text); border-color: var(--text); color: var(--bg); }
-.btn--sm { padding: 7px 14px; font-size: 13.5px; border-radius: 8px; }
+.btn--sm { padding: 7px 14px; font-size: 14.85px; border-radius: 8px; }
 
 /* ---------- Shared section heading ---------- */
 .section-title {
   text-align: center;
-  font-size: 32px;
+  font-size: 35.2px;
   letter-spacing: -0.02em;
   margin: 0 0 36px;
 }
@@ -228,14 +228,14 @@ code {
 .showcase__eyebrow {
   display: block;
   color: var(--accent);
-  font-size: 12px;
+  font-size: 13.2px;
   font-weight: 600;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   margin-bottom: 8px;
 }
-.showcase__heading { font-size: 26px; letter-spacing: -0.015em; margin: 0 0 10px; }
-.showcase__body { color: var(--text-dim); font-size: 15px; margin: 0; }
+.showcase__heading { font-size: 28.6px; letter-spacing: -0.015em; margin: 0 0 10px; }
+.showcase__body { color: var(--text-dim); font-size: 16.5px; margin: 0; }
 .showcase__points {
   list-style: none;
   margin: 14px 0 0;
@@ -248,7 +248,7 @@ code {
   position: relative;
   padding-left: 18px;
   color: var(--text-dim);
-  font-size: 13.5px;
+  font-size: 14.85px;
 }
 .showcase__points li::before {
   content: '';
@@ -293,7 +293,7 @@ code {
 }
 .showcase__frame-label {
   color: var(--text-faint);
-  font-size: 12px;
+  font-size: 13.2px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -301,7 +301,7 @@ code {
    placeholder taller than the rest. */
 .showcase__frame-hint {
   color: var(--text-faint);
-  font-size: 13px;
+  font-size: 14.3px;
   opacity: 0.8;
   max-width: 30ch;
   display: -webkit-box;
@@ -318,7 +318,7 @@ code {
   padding: 48px 24px;
   text-align: center;
 }
-.cta__lead { color: var(--text-dim); font-size: 17px; margin: 0 0 28px; }
+.cta__lead { color: var(--text-dim); font-size: 18.7px; margin: 0 0 28px; }
 .cta__actions { display: flex; gap: 12px; justify-content: center; }
 /* Label/value pairs on one grid so the values line up into a column that can be
    read straight down. Centred text would turn it back into prose. */
@@ -331,11 +331,11 @@ code {
   padding-top: 22px;
   border-top: 1px solid var(--border);
   text-align: left;
-  font-size: 14px;
+  font-size: 15.4px;
 }
 .cta__spec dt { color: var(--text-faint); }
 .cta__spec dd { color: var(--text-dim); margin: 0; }
-.cta__meta { color: var(--text-faint); font-size: 13px; margin: 20px 0 0; line-height: 1.7; }
+.cta__meta { color: var(--text-faint); font-size: 14.3px; margin: 20px 0 0; line-height: 1.7; }
 
 /* ---------- Rope reel (landing) ----------
    One scroll gesture = one panel, hauled in on the rope drawn down the left
@@ -416,7 +416,7 @@ body.reel-active .site-footer { display: none; }
   top: 50%;
   transform: translateY(-50%);
   white-space: nowrap;
-  font-size: 12px;
+  font-size: 13.2px;
   color: var(--text-dim);
   background: var(--bg-elev);
   border: 1px solid var(--border);
@@ -458,7 +458,7 @@ body.reel-active .site-footer { display: none; }
   left: 50%;
   bottom: 26px;
   transform: translateX(-50%);
-  font-size: 12px;
+  font-size: 13.2px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--text-faint);
@@ -489,7 +489,7 @@ body.reel-active .site-footer { display: none; }
   --showcase-media-h: min(var(--showcase-row-h), calc(42vw * 9 / 16));
   --showcase-media-w: calc(var(--showcase-media-h) * 16 / 9);
 }
-.reel:not(.reel--static) .showcase .section-title { font-size: 26px; margin-bottom: 20px; }
+.reel:not(.reel--static) .showcase .section-title { font-size: 28.6px; margin-bottom: 20px; }
 /* A stated row height rather than a fraction of the container. Fractions would
    tie a block's size to how many blocks its group happens to hold — a group of
    one would stretch to the whole panel and its clip would tower over the rest.
@@ -522,8 +522,8 @@ body.reel-active .site-footer { display: none; }
   height: var(--showcase-media-h);
 }
 .reel:not(.reel--static) .showcase__text { min-height: 0; overflow: hidden; }
-.reel:not(.reel--static) .showcase__heading { font-size: 22px; margin-bottom: 8px; }
-.reel:not(.reel--static) .showcase__body { font-size: 14px; }
+.reel:not(.reel--static) .showcase__heading { font-size: 24.2px; margin-bottom: 8px; }
+.reel:not(.reel--static) .showcase__body { font-size: 15.4px; }
 .reel:not(.reel--static) .showcase__points { margin-top: 10px; }
 .reel:not(.reel--static) .cta { margin: 0 auto; }
 
@@ -787,12 +787,12 @@ body.reel-active .site-footer { display: none; }
 /* ---------- Responsive ---------- */
 @media (max-width: 900px) {
   .hero { grid-template-columns: 1fr; padding-top: 48px; }
-  .hero__title { font-size: 44px; }
+  .hero__title { font-size: 48.4px; }
   /* Stacked: media under its text, and the flip has nothing left to flip. */
   .showcase__row { grid-template-columns: 1fr; gap: 20px; }
   .showcase__row--flip .showcase__text,
   .showcase__row--flip .showcase__media { order: 0; }
-  .showcase__heading { font-size: 22px; }
+  .showcase__heading { font-size: 24.2px; }
   .docs-layout { grid-template-columns: 1fr; }
   .sidebar {
     position: static;
