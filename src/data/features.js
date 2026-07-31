@@ -49,16 +49,23 @@ export const SHOWCASE = [
         heading: 'Throw it. It wraps. It holds.',
         body:
           'Add a component to the rope and one to whatever should be grabbable, then call Throw(). It flies, catches a character’s bones or a prop, and holds — pull it, reel it in, or let go.',
-        points: ['No rig work — just mark a target grabbable', 'Let go mid-wrap and it unwinds cleanly'],
+        // "mid-wrap" is a real phase name (see the Presets doc), but it means
+        // nothing to someone who has not read the phase model yet, and this is
+        // the first panel they see. The docs keep the term; the landing spends
+        // four plain words instead.
+        points: [
+          'Works with your existing skeleton',
+          'Let go while it is still wrapping and it unwinds — no snag, no jolt',
+        ],
         media: null,
         mediaHint: 'Throw → wrap → hold, one continuous take',
       },
       {
         id: 'wrap-modes',
-        eyebrow: 'Wrap contracts',
+        eyebrow: 'Resolve modes',
         heading: 'Decide how much a throw can miss',
         body:
-          'Full Simulation lets physics decide, and it can whiff. Assisted always connects but judges whether the bind takes. Guaranteed catches what you aimed at. After the catch, all three behave the same.',
+          'Full Simulation lets physics decide, and the throw can miss. Assisted always reaches the target but decides whether the wrap holds. Guaranteed catches what you aimed at. After the catch, all three behave the same.',
         points: ['Set per rope — a boss grapple can differ', 'Swap at runtime to tune difficulty'],
         media: null,
         mediaHint: 'Same throw in all three modes, side by side',
@@ -82,10 +89,10 @@ export const SHOWCASE = [
       {
         id: 'hold-pull',
         eyebrow: 'Hold & pull',
-        heading: 'The line goes taut, and both ends feel it',
+        heading: 'The line goes tight, and both ends feel it',
         body:
-          'The rope has a real length. When it runs out neither end can walk through it, and the rope reports how hard it is being pulled. Haul something too heavy and it hauls you in instead.',
-        points: ['Tension is a number you can build on', 'Climb in when you are outmatched'],
+          'The rope has a real length. When it runs out neither end can walk through it, and the rope reports how hard it is being pulled. Pull something too heavy and it pulls you in instead.',
+        points: ['Tension is a number you can build on', 'Climb in when the target is too heavy'],
         media: null,
         mediaHint: 'Pull gauge filling, then climb-in on a heavy target',
       },
@@ -107,7 +114,7 @@ export const SHOWCASE = [
         eyebrow: 'Authoring',
         heading: 'Bake collision to the fidelity you want',
         body:
-          'Voxel size, precision, detection band, how thin a bone must be before it is skipped — every knob is exposed with its trade-off spelled out. Adjust, hit Bake, and the preview updates. Sharper surface or smaller asset is your call.',
+          'Voxel size, precision, detection band, how thin a bone must be before it is skipped — every knob is exposed with its trade-off spelled out. Adjust, hit Bake, and the preview updates. Sharper surface or smaller asset — you decide.',
         points: ['One button, with progress you can cancel', 'The asset remembers your last settings'],
         media: null,
         mediaHint: 'Editor: nudge voxel size, hit Bake, preview sharpens',
@@ -117,8 +124,14 @@ export const SHOWCASE = [
         eyebrow: 'Debugging',
         heading: 'See why it did that',
         body:
-          'When a rope does something you did not expect, an on-screen readout names the state it is in and how it is being solved. Presets restamp an entire rope setup onto another in one click.',
-        points: ['Presets restamp a whole rope at once', 'The debugger names how each rope solves'],
+          'When a rope does something you did not expect, an on-screen readout names the state it is in and how it is being solved. Presets copy an entire rope setup onto another in one click.',
+        // Bullets carry what the body does not. They used to restate it — the
+        // body already says presets copy a setup and that the readout names how
+        // a rope solves, so repeating both here bought the reader nothing.
+        points: [
+          'Six sub-views on hotkeys — flight, wrap, colliders, aim',
+          'A second view flags any rope that fell back to the CPU',
+        ],
         media: null,
         mediaHint: 'Gameplay Debugger overlay during a live throw',
       },
@@ -133,8 +146,11 @@ export const SHOWCASE = [
         eyebrow: 'Gameplay',
         heading: 'Wired for a real game, not a demo',
         body:
-          'Throw and pull are already on input, the aim reticle and pull gauge are already drawn, and the animation windows for the throw and the pull are already marked. Caught characters can go limp on contact.',
-        points: ['Drop-in wielder component', 'Notifies mark the throw and pull windows'],
+          'Throw and pull are already on input, the aim crosshair and pull gauge are already drawn, and the throw and the pull are already marked on the animation timeline. Caught characters can go ragdoll on contact.',
+        points: [
+          'One component on the character that holds the rope',
+          'Anim notifies fire the throw and open the pull window',
+        ],
         media: null,
         mediaHint: 'Full input loop from a player camera, HUD visible',
       },

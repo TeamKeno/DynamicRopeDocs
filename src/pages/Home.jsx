@@ -14,7 +14,7 @@ function Hero() {
         <p className="hero__lead">
           Throw it, and it flies, wraps around a character’s bones, then holds, pulls, or releases.
           The wrap rides the skeleton it caught, so it keeps holding while they run, struggle, and
-          go limp.
+          go ragdoll.
         </p>
         <div className="hero__actions">
           <Link to="/docs/quick-start" className="btn btn--primary">
