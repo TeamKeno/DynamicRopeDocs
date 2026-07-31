@@ -335,7 +335,7 @@ code {
 }
 .cta__spec dt { color: var(--text-faint); }
 .cta__spec dd { color: var(--text-dim); margin: 0; }
-.cta__meta { color: var(--text-faint); font-size: 13px; margin: 20px 0 0; }
+.cta__meta { color: var(--text-faint); font-size: 13px; margin: 20px 0 0; line-height: 1.7; }
 
 /* ---------- Rope reel (landing) ----------
    One scroll gesture = one panel, hauled in on the rope drawn down the left

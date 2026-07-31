@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { PLUGIN } from '../data/nav.js'
+import { PLUGIN, hasSupportEmail } from '../data/nav.js'
 import { HERO_MEDIA, HERO_MEDIA_HINT, SHOWCASE } from '../data/features.js'
 import { asset } from '../lib/asset.js'
 import RopeReel from '../components/RopeReel.jsx'
@@ -98,7 +98,19 @@ function Cta() {
         <dt>Included</dt>
         <dd>Demo map, stress-test map, 13 sample Blueprints</dd>
       </dl>
-      <p className="cta__meta">by {PLUGIN.author}</p>
+      {/* The site footer is hidden while the reel is running (see
+          body.reel-active in global.css), so this is the only contact route on
+          the landing page. Guarded the same way as the footer and the support
+          doc: a mailto: that goes nowhere is worse than no address at all. */}
+      <p className="cta__meta">
+        by {PLUGIN.author}
+        {hasSupportEmail() ? (
+          <>
+            <br />
+            <a href={`mailto:${PLUGIN.supportEmail}`}>{PLUGIN.supportEmail}</a>
+          </>
+        ) : null}
+      </p>
     </div>
   )
 }
