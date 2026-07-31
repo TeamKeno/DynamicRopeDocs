@@ -1060,6 +1060,18 @@ Rope->HadLogicOverrideThisFrame();  // a logic phase produced node overrides
           length, solver, throw, whip, wrap, hold, tip and render settings — applied to a component as one
           stamp.
         </p>
+        <p>
+          Make one from the Content Browser’s <strong>Add</strong> menu, under{' '}
+          <strong>Dynamic Rope → Rope Preset</strong>. The same submenu is where{' '}
+          <code>URopeSDFData</code> comes from — see <Link to="/docs/sdf-authoring">SDF Authoring</Link>.
+        </p>
+        <Figure
+          src="media/Preset_Make.webp"
+          width={368}
+          height={874}
+          alt="The Content Browser Add menu with the Dynamic Rope submenu open, offering Rope Preset and Rope SDF Data."
+          caption="Add → Dynamic Rope. Both of the plugin’s asset types are created here."
+        />
         <CodeBlock
           language="cpp"
           code={`if (Rope->ApplyPreset(MyPreset))
@@ -1179,6 +1191,13 @@ Rope.Ragdoll.Destroy   // destroy the target, to exercise the mid-wrap loss path
             narrow <strong>Bone Filter</strong> to the bones you actually want wrappable.
           </li>
         </ol>
+        <Figure
+          src="media/Authoring.webp"
+          width={1280}
+          height={720}
+          alt="The Rope SDF Authoring tab: bake settings and preview overlay controls down the left, and a viewport showing the mannequin with a slice heatmap drawn through its baked bone volumes."
+          caption="The whole panel — bake settings above, Preview Overlay below, and the result drawn on the source mesh beside them. Both sections are covered below."
+        />
 
         <h2>Bake settings</h2>
         <PropTable
@@ -1320,6 +1339,13 @@ Rope.Ragdoll.Destroy   // destroy the target, to exercise the mid-wrap loss path
           summary counting how many ropes are on each, which is the fastest way to catch one that quietly
           dropped to the CPU path.
         </p>
+        <Figure
+          src="media/Debugging.webp"
+          width={1280}
+          height={720}
+          alt="Both debugger categories drawn over a level: the Rope category showing its views line and a solve= line, and RopePerf below it counting the world's ropes and listing them one per line."
+          caption="Both categories at once. Rope carries the views line and solve=GPU_SOLVE; RopePerf reports registered=34 gpu=34 cpu=0 over the per-rope list."
+        />
 
         <h2>Console</h2>
         <CodeBlock
@@ -1607,6 +1633,17 @@ Rope->GetSolverLODScale();`}
         </Callout>
 
         <h2>Rope actions</h2>
+        <p>
+          Every action below is an ordinary Blueprint node taking the rope component as its target, so the
+          smallest working throw is two nodes and a wire:
+        </p>
+        <Figure
+          src="media/Blueprint_Throw.webp"
+          width={447}
+          height={139}
+          alt="A Blueprint graph: the Rope component output pin wired into the Target input of a Throw node."
+          caption="The rope component into Throw. Direction comes from ThrowParams, so there is nothing else to feed it."
+        />
         <PropTable
           columns={['Node', 'Notes']}
           rows={[

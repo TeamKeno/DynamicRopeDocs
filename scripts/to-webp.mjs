@@ -37,7 +37,15 @@ const MANIFEST = join(SRC, '.manifest.json')
 // q80 does visibly mush the low-contrast grey rows (particles=, registered=).
 // So text shots get q90, and everything else -- 3D renders with no glyphs in
 // them -- stays at q80.
-const TEXT = new Set(['Authoring', 'Debugging', 'StressTest'])
+const TEXT = new Set([
+  'Authoring',
+  'Debugging',
+  'StressTest',
+  // Editor UI rather than a render: a context menu and a Blueprint node, both
+  // of which are almost entirely small type on flat panels.
+  'Preset_Make',
+  'Blueprint_Throw',
+])
 const QUALITY = 80
 const QUALITY_TEXT = 90
 // StressTest is a clip rather than a still, and a lossy frame every 80ms adds up
@@ -69,7 +77,7 @@ const RATIO_TOLERANCE = 0.01
 // their own ratio, precisely so a readout cannot be cropped off the edge. The
 // ratio warning does not apply to them, and firing it anyway would be the kind
 // of standing false alarm that teaches people to skip the warnings that matter.
-const UNFRAMED = new Set(['StressTest'])
+const UNFRAMED = new Set(['StressTest', 'Preset_Make', 'Blueprint_Throw'])
 
 if (!existsSync(SRC)) {
   console.error(`No ${SRC}/ directory. Put the original captures there.`)

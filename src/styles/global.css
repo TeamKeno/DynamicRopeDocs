@@ -719,9 +719,16 @@ body.reel-active .site-footer { display: none; }
    DocPrimitives. The width and height attributes hold the box before the file
    arrives, which is the same reflow the embed's ratio box prevents. */
 .doc-figure { margin: 20px 0 26px; }
+/* Natural size, capped at the measure — not stretched to fill it. Some of these
+   are small editor grabs: a 447px Blueprint node, a 368px context menu. Blown up
+   to 800 they would only be a blurrier version of the type they exist to show,
+   and a menu rendered twice its real size stops looking like the menu you are
+   being told to find. Anything wider than the measure still comes down to it.
+   The width and height attributes carry the ratio, so the box is reserved at the
+   right shape before the file arrives either way. */
 .doc-figure__img {
   display: block;
-  width: 100%;
+  max-width: 100%;
   height: auto;
   border: 1px solid var(--border);
   border-radius: 10px;
