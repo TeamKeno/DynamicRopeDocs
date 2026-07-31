@@ -33,6 +33,30 @@ export function CodeBlock({ code, language }) {
   )
 }
 
+/**
+ * An embedded YouTube player, sized by a 16:9 box so it fills the doc measure
+ * at any width. The nocookie host is the one that does not write tracking
+ * cookies for a reader who never presses play, and the frame is lazy so a page
+ * that opens below the video does not pay for the player on load.
+ */
+export function VideoEmbed({ id, title, caption }) {
+  return (
+    <figure className="video-embed">
+      <div className="video-embed__frame">
+        <iframe
+          src={`https://www.youtube-nocookie.com/embed/${id}`}
+          title={title}
+          loading="lazy"
+          referrerPolicy="strict-origin-when-cross-origin"
+          allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          allowFullScreen
+        />
+      </div>
+      {caption ? <figcaption className="video-embed__caption">{caption}</figcaption> : null}
+    </figure>
+  )
+}
+
 export function Callout({ type = 'info', title, children }) {
   return (
     <div className={`callout callout--${type}`}>

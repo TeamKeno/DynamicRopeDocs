@@ -3,7 +3,7 @@
 // headers (URopeComponent, URopeWielderComponent, the Core/ config structs).
 // Still to replace before publishing: screenshots, video links, the Fab URL
 // and the support address in nav.js.
-import { CodeBlock, Callout, PropTable, Names } from '../components/DocPrimitives.jsx'
+import { CodeBlock, Callout, PropTable, Names, VideoEmbed } from '../components/DocPrimitives.jsx'
 import { Link } from 'react-router-dom'
 import { PLUGIN, hasSupportEmail } from './nav.js'
 
@@ -239,6 +239,11 @@ export const DOCS = {
     title: 'Quick Start',
     body: (
       <>
+        <VideoEmbed
+          id="HnpPGl45S0U"
+          title="DynamicRope quick start walkthrough"
+          caption="The same setup as below, start to finish."
+        />
         <p>Get a working throw-and-wrap in a few minutes.</p>
 
         <h2>1. Put a rope on the thrower</h2>

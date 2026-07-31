@@ -661,6 +661,29 @@ body.reel-active .site-footer { display: none; }
 .callout__body { color: var(--text-dim); font-size: 14.5px; }
 .callout__body ul { margin: 4px 0; }
 
+/* ---------- Embedded video ---------- */
+/* The ratio lives on the box rather than the iframe so the frame keeps its
+   shape while it is still empty — no reflow when the player finally loads. */
+.video-embed { margin: 0 0 28px; }
+.video-embed__frame {
+  aspect-ratio: 16 / 9;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  background: #0a0c11;
+}
+.video-embed__frame iframe {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+.video-embed__caption {
+  margin-top: 8px;
+  font-size: 13px;
+  color: var(--text-faint);
+}
+
 /* ---------- Reference tables ---------- */
 .prop-table-wrap {
   overflow-x: auto;
