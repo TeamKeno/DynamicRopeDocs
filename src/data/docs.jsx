@@ -958,6 +958,26 @@ Rope->HadLogicOverrideThisFrame();  // a logic phase produced node overrides
           how many ropes are awake at once, and whether they collide against SDFs or capsules. Re-run
           the map at your own numbers and hold yourself to what it says there.
         </Callout>
+
+        <h2>Low frame-rate targets</h2>
+        <p>
+          If your game runs at — or dips to — roughly <strong>40 fps or below</strong>, enable
+          fixed-tick physics: <strong>Project Settings → Physics → Framerate → Tick Physics Async</strong>,
+          with <strong>Async Fixed Time Step Size = 0.01667</strong> (60&nbsp;Hz).
+        </p>
+        <p>
+          The reason is the ragdoll tether. A ragdolled target is held by a hard Chaos distance
+          constraint (see <Link to="/docs/ragdoll">Ragdoll Response</Link>), and at large variable
+          physics ticks that constraint oscillates instead of holding — the rope jitters and cannot
+          reel the ragdoll in. A fixed 60&nbsp;Hz step keeps tether behavior identical across frame
+          rates. The standard async-physics trade-offs apply: physics interactions see about one step
+          of extra latency.
+        </p>
+        <p>
+          To see the tether numerically while tuning, use the non-shipping console variable{' '}
+          <code>dr.Rope.LiftDebug</code> — see{' '}
+          <Link to="/docs/debugging">Debugging &amp; Profiling</Link>.
+        </p>
       </>
     ),
   },
@@ -1153,6 +1173,15 @@ Rope.Preset.Apply <n> // apply a specific one`}
           constraint — a kinematic corner proxy against an anchor point on the wrapped bone, with a
           spherical distance limit — so Chaos solves the rope’s length limit together with the ragdoll
           joints per substep. That is what keeps it stable instead of jittering or winching.
+        </Callout>
+
+        <Callout type="warn" title="Below ~40 fps, fix the physics tick">
+          That hard distance constraint assumes a reasonably steady physics step. At large variable
+          ticks it oscillates instead of holding — the rope jitters and cannot reel the ragdoll in.
+          If your game runs at (or dips to) roughly 40 fps or below, enable{' '}
+          <strong>Tick Physics Async</strong> with a fixed step of <strong>0.01667</strong> (60&nbsp;Hz)
+          — the how and the trade-offs are in{' '}
+          <Link to="/docs/performance">Performance &amp; Budgeting</Link>.
         </Callout>
 
         <h2>Testing it</h2>
@@ -1361,10 +1390,19 @@ Rope.Ragdoll.Destroy   // destroy the target, to exercise the mid-wrap loss path
           language="text"
           code={`r.DynamicRope.ForceCPUSolve 1        // force the CPU path (parity checks, GPU isolation)
 r.DynamicRope.Debug.LogSDFProjection 1  // log SDF surface projections
+dr.Rope.LiftDebug 15                  // log tether numbers for each wrapped rope every 15 frames
 
 Rope.Preset.List / .Cycle / .Apply    // preset cycling (non-Shipping)
 Rope.Ragdoll / .Recover / .Destroy    // ragdoll response testing (non-Shipping)`}
         />
+        <p>
+          <code>dr.Rope.LiftDebug &lt;N&gt;</code> is the numeric view of the tether while a wrap is
+          held: every N frames it logs each wrapped rope’s material length, leg limit, measured span,
+          violation and tension. Use it when tuning the length constraint or diagnosing tether jitter —
+          for example at low frame rates, where the fix is fixed-tick physics (see{' '}
+          <Link to="/docs/performance">Performance &amp; Budgeting</Link>). 0 turns it off, and like the
+          other commands it is compiled out of Shipping builds.
+        </p>
 
         <h2>Automation tests</h2>
         <p>
@@ -1890,6 +1928,17 @@ Rope->GetSolverLODScale();`}
           row is the answer. Switch to the <strong>Rope</strong> category if you then need to know which
           kind of frame it was. The usual causes are a node count or ring count above 512, or no
           renderable RHI.
+        </p>
+
+        <h2>The rope jitters and cannot reel a ragdolled target in.</h2>
+        <p>
+          Check your frame rate first. Ragdoll targets are held by a hard Chaos distance constraint,
+          and at large variable physics ticks — roughly 40&nbsp;fps or below — that constraint
+          oscillates instead of holding. Enable <strong>Tick Physics Async</strong> with a fixed step
+          of 0.01667 (60&nbsp;Hz); the details and trade-offs are in{' '}
+          <Link to="/docs/performance">Performance &amp; Budgeting</Link>. To watch the tether
+          numerically while you verify, use <code>dr.Rope.LiftDebug 15</code> — see{' '}
+          <Link to="/docs/debugging">Debugging &amp; Profiling</Link>.
         </p>
 
         <h2>Performance dips with many ropes.</h2>
