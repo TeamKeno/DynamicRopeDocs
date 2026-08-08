@@ -55,9 +55,9 @@ export const DOCS = {
             <li>Engine: Unreal Engine {PLUGIN.engineVersions.join(' / ')} — {PLUGIN.platforms}</li>
             <li>GPU XPBD solver and tube builder on RDG, with automatic CPU fallback</li>
             <li>Up to 512 simulated nodes per rope</li>
-            <li>Per-bone capsules, baked per-bone SDFs, static world bodies and the engine Global Distance Field — all behind one collider interface</li>
+            <li>Per-bone capsules, baked per-bone SDFs and static world bodies behind one collider contract, plus the engine Global Distance Field on the GPU path</li>
             <li>Cross-actor wrapping, multi-bone wraps, moving-surface friction</li>
-            <li>Enhanced Input wielder component, aim HUD, pull gauge, anim notifies</li>
+            <li>Enhanced Input wielder component, aim HUD, pull and reel gauges, an opt-in wrap camera, anim notifies</li>
             <li>Preset assets, an SDF authoring panel, and two Gameplay Debugger categories</li>
           </ul>
         </Callout>
@@ -100,19 +100,18 @@ export const DOCS = {
 
         <h2>Platform</h2>
         <p>
-          Developed and tested on <strong>{PLUGIN.platforms}</strong>. Worth separating two things that
-          often get conflated: nothing in the plugin is gated to Windows — there is no platform allow
-          list on the modules, and the GPU path is ordinary RDG compute with a CPU fallback behind it —
-          but Windows is the only platform it has actually been run on. Treat anything else as
-          unverified rather than as excluded.
+          Developed and tested on <strong>{PLUGIN.platforms}</strong>, and the modules carry a Win64
+          platform allow list, so the plugin as shipped builds for Windows only. Nothing in the code is
+          inherently Windows-bound — the GPU path is ordinary RDG compute with a CPU fallback behind it
+          — but other platforms are untested and excluded from the build as it stands.
         </p>
 
         <h2>Blueprint or C++</h2>
         <p>
           A rope can be built, thrown, tuned and reacted to entirely from Blueprint. The rope component
-          exposes 33 callable functions and five assignable events, the wielder another 29, and the
-          ragdoll response component five more — the throw, the wrap, the tension readout, pull, reel and
-          release are all on that surface. See{' '}
+          exposes 35 callable functions and five assignable events, the wielder another 33 with six
+          events of its own, and the ragdoll response component five more — the throw, the wrap, the
+          tension readout, pull, reel and release are all on that surface. See{' '}
           <Link to="/docs/blueprint-api">Blueprint API &amp; Events</Link>.
         </p>
         <p>
@@ -124,9 +123,9 @@ export const DOCS = {
         <h2>Multiplayer</h2>
         <Callout type="warn" title="Single-player only">
           The plugin does not replicate. Rope and wrap state are local to the machine simulating them,
-          and on a replicated pawn the wielder deliberately does nothing for simulated proxies rather
-          than fighting network smoothing with a locally guessed rope. A remote client will not see a
-          correct rope. Plan for single-player, or for a mode where only the local player throws and
+          and on a replicated pawn the wielder’s length constraint deliberately skips simulated proxies
+          rather than fighting network smoothing with a locally guessed rope. A remote client will not
+          see a correct rope. Plan for single-player, or for a mode where only the local player throws and
           others never need to see it accurately.
         </Callout>
 
@@ -144,7 +143,7 @@ export const DOCS = {
               'Worked examples rather than a single showcase actor — a snare, a lever, a pressure plate, an elevator, a helicopter winch, a basket goal and an AI character among them, plus the HUD and level pieces the demo map is assembled from.',
             ],
             ['A baked SDF asset', 'The third-person mannequin, already baked, so the SDF path runs without authoring anything first.'],
-            ['Third-person template + throw / pull animations', 'A character to throw from on the first launch.'],
+            ['Third-person template + throw animations', 'A character to throw from on the first launch.'],
           ]}
         />
 
@@ -326,7 +325,7 @@ Rope->Throw();`}
         </p>
         <CodeBlock
           language="cpp"
-          code={`FRopeThrowContext Ctx = FRopeThrowContext::MakeDefault(*Rope);
+          code={`FRopeThrowContext Ctx = FRopeThrowContext::MakeDefault(*Rope, Rope->ThrowParams);
 Ctx.Origin       = HandSocketWorld;
 Ctx.FrameForward = (TargetLocation - HandSocketWorld).GetSafeNormal();
 Ctx.FrameUp      = FVector::UpVector;
@@ -354,7 +353,7 @@ Rope->ThrowWithContext(Ctx);`}
 void AMyChar::HandleWrapped(const FRopeWrappedEventInfo& Info)
 {
     // Info.Bone / Info.Bones / Info.Mesh / Info.AngleDeg / Info.CoverageDeg / Info.AnchorCount
-    Rope->SetActivePull(120000.f);   // constant pull force while taut
+    Rope->SetActivePull(120000.f);   // pull under this tension cap while taut
 }`}
         />
       </>
@@ -454,7 +453,7 @@ Loaded -> GuidedThrow -> Wrapped        (Guaranteed mode only)`}
           rows={[
             ['Free', 'Solver', 'The rope hangs and swings. Sleeps when it stops moving.'],
             ['Flight', 'Solver', 'The thrown rope flies; the whip guide shapes the swing; contact candidates are collected.'],
-            ['Contacting', 'Logic', 'Candidates are re-collected every frame and the tracker’s dwell time decides whether to start wrapping.'],
+            ['Contacting', 'Logic', 'Candidates are re-collected every frame; wrapping starts as soon as the contacts produce a valid wrap seed.'],
             ['Wrapping', 'Logic + solver', 'A surface path is built progressively, the front moves along it, and mass is masked as nodes latch.'],
             ['Wrapped', 'Logic + solver', 'Latched nodes are frozen in bone-local space and re-placed on the skinned bone each frame; free stretches still solve.'],
             ['GuidedThrow', 'Logic', 'Guaranteed mode only. Follows the committed preview path (or an arc into open space).'],
@@ -494,7 +493,7 @@ Loaded -> GuidedThrow -> Wrapped        (Guaranteed mode only)`}
           rows={[
             ['Manual', 'Gameplay called ReleaseWrap().'],
             ['Distance', 'Hand-to-anchor distance exceeded the available length plus DistanceReleaseSlack.'],
-            ['Tension', 'Max tension stayed above TensionReleaseForce for TensionReleaseTime.'],
+            ['Tension', 'The constraint tension (GetConstraintTension) stayed above TensionReleaseForce for TensionReleaseTime.'],
             ['Broken', 'Internal cause — target lost, wrap failed, aborted during contact or wrapping.'],
             ['Cut', 'Gameplay called CutRope().'],
             ['ThrowAborted', 'A game rule broke a Guaranteed throw via ShouldAbortGuaranteedThrow().'],
@@ -509,10 +508,12 @@ Loaded -> GuidedThrow -> Wrapped        (Guaranteed mode only)`}
     body: (
       <>
         <p>
-          The solver only ever calls a single collider interface (<code>IRopeCollider::Query</code>) —
-          it never knows whether the collider is a bone capsule, a per-bone SDF, a world box, a convex
-          hull or the engine distance field. Providers (<code>IRopeColliderProvider</code>) supply
-          colliders per frame, which is where broad phase happens.
+          Colliders all speak one contract: providers (<code>IRopeColliderProvider</code>) supply{' '}
+          <code>IRopeCollider</code> objects per frame — bone capsules, per-bone SDFs, world boxes,
+          convex hulls — which is where broad phase happens. The CPU fallback queries that interface
+          directly; the GPU path decomposes the same colliders into typed buffers and loops them in the
+          kernel. The engine’s Global Distance Field is not a collider at all — it joins the GPU solve
+          as a shader permutation.
         </p>
 
         <h2>Providers</h2>
@@ -521,13 +522,13 @@ Loaded -> GuidedThrow -> Wrapped        (Guaranteed mode only)`}
           rows={[
             [
               <code key="a">URopeBoneCapsuleProvider</code>,
-              'One analytic capsule per listed bone, rebuilt each frame',
-              'Cheapest path. Set Bones and CapsuleRadius.',
+              'One analytic capsule per bone, rebuilt each frame',
+              'Cheapest path. Leave Bones empty to build capsules from the physics asset automatically, or list Bones explicitly with CapsuleRadius.',
             ],
             [
               <code key="b">URopeSDFProvider</code>,
               'Baked per-bone signed distance fields',
-              'Surface-accurate. Needs a URopeSDFData asset; optional BoneFilter.',
+              'Surface-accurate. Needs a URopeSDFData asset; optional bone filtering via Bone Filter Mode + Bone Filter.',
             ],
             [
               <code key="c">URopeStaticBodyProvider</code>,
@@ -537,7 +538,7 @@ Loaded -> GuidedThrow -> Wrapped        (Guaranteed mode only)`}
             [
               <code key="d">URopeWrapTargetComponent</code>,
               'A static prop as a real wrap target',
-              'Give a pole or beam a wrap axis and radius so the rope can coil it.',
+              'Auto mode (the default) serves every authored simple-collision shape with a derived axis and radius; manual Shape, Axis and Radius are the escape hatches, and WrapBoneName makes the hold follow a socket.',
             ],
           ]}
         />
@@ -570,12 +571,13 @@ Loaded -> GuidedThrow -> Wrapped        (Guaranteed mode only)`}
 
         <h2>The wrap decision</h2>
         <p>
-          A capture commits only when at least <code>MinLatchNodes</code> nodes stay in sustained contact
-          with one bone for <code>WrapDecisionTime</code>. From there the wrapping phase builds a surface
-          path (analytic helix or surface vector field, chosen by <code>WrappingAxisSource</code>), moves
-          the wrap front along it, and masks node mass as anchors latch. On commit, those nodes are frozen
-          into bone-local space and re-placed on the skinned bone every frame — so the wrap follows
-          animation.
+          A capture commits as soon as at least <code>MinLatchNodes</code> nodes make real contact with
+          one bone and produce a valid wrap seed — there is no dwell timer. From there the wrapping phase
+          builds a surface path — an analytic helix, or a surface vector field when the target geometry
+          demands it; the geometry picks the strategy, while <code>WrappingAxisSource</code> only says
+          where the axis and its measurement frame come from — moves the wrap front along it, and masks
+          node mass as anchors latch. On commit, those nodes are frozen into bone-local space and
+          re-placed on the skinned bone every frame — so the wrap follows animation.
         </p>
         <p>Two optional quality gates decide whether a commit is accepted at all:</p>
         <ul>
@@ -590,7 +592,9 @@ Loaded -> GuidedThrow -> Wrapped        (Guaranteed mode only)`}
         <p>
           Both are 0 (off) by default and both are reported on the wrap event as{' '}
           <code>AngleDeg</code> / <code>CoverageDeg</code>, so you can measure real throws before turning
-          the gates on. Multi-bone wraps (catching both legs) are enabled by default —{' '}
+          the gates on. One gate <em>is</em> on by default: <code>FailedWrapMinAngleDeg</code> (120°)
+          releases a wrap whose path build failed below that angle instead of committing it. Multi-bone
+          wraps (catching both legs) are enabled by default —{' '}
           <code>bEnableMultiBoneWrapping</code> — and every spanned bone is listed in{' '}
           <code>FRopeWrappedEventInfo::Bones</code>.
         </p>
@@ -624,6 +628,7 @@ Loaded -> GuidedThrow -> Wrapped        (Guaranteed mode only)`}
             ['Static Body Max Colliders Per Rope', '32', 'How many world colliders one rope carries into its solve; excess is dropped furthest-first.'],
             ['Static Body Max Convex Planes', '32', 'Convexes above this fall back to the element box OBB.'],
             ['Include World Dynamic', 'On', 'Also collect WorldDynamic bodies (platforms, doors, elevators).'],
+            ['Include Physics Bodies', 'Off', 'Also collect simulating physics props as one-way push-out colliders.'],
           ]}
         />
       </>
@@ -651,16 +656,15 @@ Loaded -> GuidedThrow -> Wrapped        (Guaranteed mode only)`}
             <code>bEnforceWielderLengthConstraint</code> — the wielder cannot walk past the rope’s length.
           </li>
           <li>
-            <code>bEnforceTargetLengthConstraint</code> — the wrapped target cannot either. Ragdoll
-            targets are held by an engine physics constraint solved by Chaos alongside the joints, rather
-            than by a per-frame impulse.
+            <code>bEnforceTargetLengthConstraint</code> — the wrapped target cannot either. It applies
+            only to a CMC-driven kinematic target on a rope whose wielder end is anchored; when both ends
+            can move, the constraint already distributes the correction by inverse mass. Ragdoll targets
+            are a different mechanism again — an engine physics constraint solved by Chaos alongside the
+            joints, rather than a per-frame impulse.
           </li>
           <li>
             <code>TetherCompliance</code> (<em>Rope Elasticity</em>) — 0 is rigid; raise it for a rope
-            that gives.
-          </li>
-          <li>
-            <code>LengthConstraintActivationSlop</code> — the slack, in cm, before the boundary engages.
+            that gives. Above 0 the hard projections on both ends hand over to the elastic solve.
           </li>
         </ul>
         <p>
@@ -713,25 +717,28 @@ if (Rope->ConstrainWielderLocation(DesiredPinWorld, Constrained, Normal, bWasCon
 
         <h2>Active pull</h2>
         <p>
-          <code>SetActivePull(Force)</code> applies a <em>constant</em> force to the wrapped target every
-          frame while the rope is taut. It is deliberately independent of measured tension, so there is no
-          feedback runaway. 0 stops it.
+          <code>SetActivePull(Force)</code> drives the wrapped target while the rope is taut. For a
+          physics body it is a <em>tension-capped velocity drive</em>: the target is driven toward{' '}
+          <strong>Pull Speed</strong> along the pull direction, with each frame’s impulse clamped by the
+          tension cap — which is what removes the judder and drift a constant force produces. 0 stops it.
         </p>
         <ul>
           <li>
-            <code>PullForce</code> (100000 by default) is the wielder’s configured strength. Character
-            targets divide it by mass and fight ground friction, so tens of thousands is the range you
-            feel.
+            <code>PullForce</code> (<em>Pull Strength</em>, 100000 by default) is the tension cap.
+            Together with the target speed it gives realistic mass dependence: a light target reaches
+            Pull Speed at once, one too heavy for the cap lags behind. A character target still takes it
+            as a plain force through CharacterMovement.
           </li>
           <li>
-            If the target is too heavy or anchored, the same force pulls the <em>wielder</em> toward the
-            anchor instead — climb-in. The decision is a pure, unit-testable function,{' '}
+            If the target is too heavy or anchored, the pull reverses and drags the <em>wielder</em>{' '}
+            toward the anchor instead — climb-in. The decision is a pure, unit-testable function,{' '}
             <code>DecideTargetPullable()</code>, with a hysteresis margin so it cannot flap at the
             boundary.
           </li>
           <li>
-            <code>ActivePullMaxLinearSpeed</code> / <code>ActivePullMaxAngularSpeed</code> cap what a
-            physics body can be driven to.
+            <code>ActivePullMaxLinearSpeed</code> (<em>Pull Speed</em>, 300 cm/s) is the speed the drive
+            aims for — at 0 a physics-body pull does nothing at all — and{' '}
+            <code>ActivePullMaxAngularSpeed</code> caps residual spin.
           </li>
           <li>
             The wielder’s <code>PullAction</code> is an <strong>armed toggle</strong>: pressing arms it,
@@ -788,9 +795,9 @@ if (Rope->ConstrainWielderLocation(DesiredPinWorld, Constrained, Normal, bWasCon
       <>
         <p>
           GPU is the single runtime path for solve, contact detection and tube rendering. It is
-          auto-selected whenever a renderable RHI exists (and, for the tube, the ring count is within
-          budget). Otherwise the CPU path runs — during cook, under <code>-nullrhi</code>, on a dedicated
-          server, or for oversized ropes.
+          auto-selected whenever a renderable RHI at Shader Model 5 or above exists. Otherwise the CPU
+          path runs — during cook, under <code>-nullrhi</code>, on a dedicated server, or on a platform
+          below SM5.
         </p>
         <ul>
           <li>XPBD solve and contact detection run as RDG compute shaders, with rope state resident on the GPU across frames.</li>
@@ -804,7 +811,7 @@ if (Rope->ConstrainWielderLocation(DesiredPinWorld, Constrained, Normal, bWasCon
           columns={['Limit', 'Value', 'What happens past it']}
           rows={[
             ['Nodes per rope', '512', 'The editor clamps Node Count; code and Blueprint paths hard-clamp on init.'],
-            ['Tube rings', '512', 'The scene proxy automatically lowers Smoothing Subdivisions to fit; past that the tube falls back to CPU.'],
+            ['Tube rings', '512', 'The scene proxy automatically lowers Smoothing Subdivisions to fit — a long rope keeps the GPU tube and only loses render smoothing gradually.'],
             ['World colliders per rope', '32 (configurable)', 'Furthest colliders are dropped. The GPU kernel loops colliders per node per substep, so this bounds cost directly.'],
           ]}
         />
@@ -883,12 +890,14 @@ Rope->HadLogicOverrideThisFrame();  // a logic phase produced node overrides
           columns={['Condition', 'What falls back']}
           rows={[
             ['No renderable RHI — cook, -nullrhi, dedicated server', 'Everything. The CPU solver and CPU tube builder take over.'],
-            [
-              'Tube over 512 rings',
-              'The tube only. That is roughly 170 nodes at a subdivision of 3 — a limit of the shader’s ring budget, so a very long or very finely subdivided rope hits it.',
-            ],
+            ['Feature level below SM5', 'Everything — the compute path needs Shader Model 5.'],
           ]}
         />
+        <p>
+          Node and ring counts never trigger a fallback: node count is clamped to 512 at init, and the
+          tube automatically steps its smoothing subdivision down — from roughly 170 nodes at a
+          subdivision of 3 — so its rings always fit the shader’s 512-ring budget.
+        </p>
         <p>
           Do not guess at which path a rope took. The <strong>RopePerf</strong> Gameplay Debugger
           category counts how many ropes are on each path and marks per rope whether it solved on the GPU
@@ -902,17 +911,17 @@ Rope->HadLogicOverrideThisFrame();  // a logic phase produced node overrides
         <PropTable
           columns={['Setting', 'Default', 'What it trades']}
           rows={[
-            ['Substeps', '12', 'The main cost multiplier. Fewer substeps is cheaper and lets a fast rope stretch or tunnel.'],
+            ['Substeps', '12', 'The main cost multiplier — the number of fixed substeps in one 60 fps frame, so a low frame rate runs more of them to cover the elapsed time (capped at ×1.5). Fewer is cheaper and lets a fast rope stretch or tunnel.'],
             ['Iterations', '4', 'Constraint passes per substep. Fewer is cheaper and softer — the rope holds its length less exactly.'],
             [
               'Node count',
-              'per rope',
-              'Set by the rope’s length and segment length rather than typed in directly. It scales everything, and it is what pushes the tube past its 512-ring budget.',
+              '64 per rope',
+              'Typed in directly (max 512); segment length derives from it as length ÷ (N − 1). It scales everything, and past ~170 nodes the tube starts stepping its smoothing subdivision down to keep rings within budget.',
             ],
             [
               'Allow Sleep',
               'on',
-              'An idle rope stops solving entirely once every node has stayed under 3 cm/s for half a second. The single biggest saving in a scene full of ropes that are mostly hanging still.',
+              'An idle Free rope stops solving entirely once every node has stayed under 3 cm/s for half a second; a Wrapped one keeps its hold logic and pauses only the free span’s solve. The single biggest saving in a scene full of ropes that are mostly hanging still.',
             ],
             [
               'Distance LOD',
@@ -1015,16 +1024,20 @@ Rope->HadLogicOverrideThisFrame();  // a logic phase produced node overrides
           <strong>Project Settings → Plugins → Dynamic Rope → Aim Hud Widget Class</strong> and defaults to
           the built-in <code>URopeAimWidget</code>, which needs no assets. Point it at a Blueprint subclass
           to restyle it, or clear it to show nothing. The same pattern applies to{' '}
-          <code>URopePullGaugeWidget</code> for pull arming and engagement.
+          <code>URopePullGaugeWidget</code> for pull arming and engagement. The sample also reports blocked
+          aims: the widget shows its blocked colour only for a refused wrap target, and keeps a neutral
+          crosshair on bare walls and floors.
         </p>
 
         <h2>The preview</h2>
         <p>
-          <code>URopePreviewComponent</code> renders the candidate wrap path as a tube before the throw.
-          In <strong>Assisted</strong> mode it is display only. In <strong>Guaranteed</strong> mode it is
-          authoritative: <code>BuildPreparedWrappingPreview()</code> produces the contacts and anchors that{' '}
+          <code>URopePreviewComponent</code> renders the candidate wrap path as a tube before the throw —
+          in <strong>Guaranteed</strong> mode only, where it is authoritative:{' '}
+          <code>BuildPreparedWrappingPreview()</code> produces the contacts and anchors that{' '}
           <code>ThrowWithPreparedPreview()</code> then executes, which is exactly why what you see is what
-          you get.
+          you get. <strong>Assisted</strong> and <strong>Full Simulation</strong> have no preview — their
+          wrap is judged or emergent, so there is no path to commit to before the throw; Assisted aiming
+          feedback comes from the aim ray HUD.
         </p>
         <Callout type="warn" title="Keep throw-context overrides pure">
           A Guaranteed throw resolves its context once at preview time and reuses it. If your{' '}
@@ -1042,10 +1055,11 @@ Rope->HadLogicOverrideThisFrame();  // a logic phase produced node overrides
           rows={[
             ['Mesh', 'None', 'Spawned at the free end.'],
             ['Component Tag', 'None', 'Reuse a tagged StaticMeshComponent already on the owner instead of spawning. Never destroyed by the rope.'],
-            ['Relative Transform', 'Identity', 'Placement offset in the tip node’s frame; applies in every phase.'],
+            ['Relative Transform', 'Identity', 'Placement offset in the tip node’s frame.'],
+            ['Loaded Relative Transform', 'Identity', 'Separate offset composed onto the hand socket frame while Loaded.'],
             ['Enable Collision', 'Off', 'Off by design — a display-only tip with collision fights the rope and the character capsule.'],
             ['Sync While Free', 'On', 'Turn off to drive Free-phase placement yourself via GetTipMeshComponent().'],
-            ['Loaded Hand Socket', 'None', 'Guaranteed mode: the socket the tip is held at while Loaded.'],
+            ['Loaded Hand Socket', 'None', 'The socket the tip is held at while Loaded.'],
             ['Use Sockets', 'Off', 'Guaranteed mode only: place the tip precisely with Tip Socket (the point that embeds) and Rope Socket (where the rope attaches).'],
           ]}
         />
@@ -1077,8 +1091,8 @@ Rope->HadLogicOverrideThisFrame();  // a logic phase produced node overrides
       <>
         <p>
           A <code>URopePreset</code> asset is a complete rope configuration — wrap mode, node count and
-          length, solver, throw, whip, wrap, hold, tip and render settings — applied to a component as one
-          stamp.
+          length, solver, throw, whip, wrap, hold, tip and render settings, plus the collision switches
+          Collide With Owner and Use World Distance Field — applied to a component as one stamp.
         </p>
         <p>
           Make one from the Content Browser’s <strong>Add</strong> menu, under{' '}
@@ -1118,6 +1132,8 @@ Rope->HadLogicOverrideThisFrame();  // a logic phase produced node overrides
           <li>
             Instance-level wiring stays put — <code>TipMeshComponentTag</code> and similar are outside the
             preset, so a preset with <code>bUseTipMesh = false</code> will not hide a tip you found by tag.
+            The one exception is <code>LoadedHandSocket</code>, which a preset overwrites only when its{' '}
+            <code>bOverrideLoadedHandSocket</code> is enabled (off by default).
           </li>
           <li>No replication. It is a local stamp.</li>
           <li>
@@ -1128,15 +1144,15 @@ Rope->HadLogicOverrideThisFrame();  // a logic phase produced node overrides
 
         <h2>Trying presets in the editor</h2>
         <p>
-          Register presets under <strong>Project Settings → Plugins → Dynamic Rope → Demo Presets</strong>,
-          then cycle them with the console. These commands are compiled out of Shipping builds; game code
+          Register presets under <strong>Project Settings → Plugins → Dynamic Rope → Demo → Demo
+          Presets</strong>, then cycle them with the console. These commands are compiled out of Shipping builds; game code
           should call <code>ApplyPreset</code> directly.
         </p>
         <CodeBlock
           language="text"
           code={`Rope.Preset.List      // list the registered demo presets
 Rope.Preset.Cycle     // apply the next one to the ropes in the world
-Rope.Preset.Apply <n> // apply a specific one`}
+Rope.Preset.Apply <n> // apply a specific one, by index or by a name substring`}
         />
         <p>
           <code>ARopeDemoPresetVolume</code> does the same thing spatially: walk a rope into the volume and
@@ -1152,7 +1168,8 @@ Rope.Preset.Apply <n> // apply a specific one`}
       <>
         <p>
           <code>URopeRagdollResponseComponent</code> is a drop-in reaction for characters that get caught.
-          Add it to the target actor and it subscribes to the rope’s wrap and release signals itself.
+          Add it to the target actor and it subscribes to the subsystem’s world-wide wrap and release
+          signals itself, so it reacts to any rope that binds its owner.
         </p>
 
         <h2>What it does</h2>
@@ -1161,10 +1178,10 @@ Rope.Preset.Apply <n> // apply a specific one`}
           rows={[
             ['Ragdoll On Wrapped', 'On', 'Go to ragdoll when a rope wraps this character.'],
             ['Delay', '0.3 s', 'Grace period before the ragdoll starts, so the wrap reads before the collapse.'],
-            ['Only Below Wrapped Bone', 'Off', 'Simulate only the sub-tree under the wrapped bone — a caught leg without dropping the whole body.'],
-            ['Recover On Release', 'On', 'Return to animation when the rope releases.'],
-            ['Follow Camera While Ragdolled', 'On', 'Retarget the view to the ragdoll, with Follow Camera Lag and Recover Camera Blend to smooth it.'],
-            ['Move Capsule To Mesh On Recover', 'On', 'Snap the character capsule to where the mesh ended up, using Recover Anchor Bone.'],
+            ['Only Below Wrapped Bone', 'Off', 'Simulate only the sub-tree under the wrapped bone. Blueprint-only, with a known limitation: while on, the tether cannot drag the target — which is why it is kept out of the details panel.'],
+            ['Recover On Release', 'On', 'Return to animation when the last wrapping rope releases. Applies only to a ragdoll the rope itself started — a manually entered ragdoll is never stood up by a release.'],
+            ['Follow Camera While Ragdolled', 'On', 'Retarget the view to a full ragdoll on a player-controlled pawn, with Follow Camera Lag and Recover Camera Blend to smooth it.'],
+            ['Move Capsule To Mesh On Recover', 'On', 'Snap the character capsule to where the mesh ended up, using Recover Anchor Bone. Recover Ground Search (500 cm) then traces down and stands it on the ground, or recovers falling. Blueprint-only.'],
           ]}
         />
 
@@ -1187,7 +1204,7 @@ Rope.Preset.Apply <n> // apply a specific one`}
         <h2>Testing it</h2>
         <CodeBlock
           language="text"
-          code={`Rope.Ragdoll           // ragdoll the target
+          code={`Rope.Ragdoll           // toggle a full ragdoll; add a bone name for a partial one
 Rope.Ragdoll.Recover   // recover to animation
 Rope.Ragdoll.Destroy   // destroy the target, to exercise the mid-wrap loss path`}
         />
@@ -1213,11 +1230,21 @@ Rope.Ragdoll.Destroy   // destroy the target, to exercise the mid-wrap loss path
 
         <h2>Baking</h2>
         <ol>
-          <li>Open the <strong>Rope SDF Authoring</strong> tab from the editor’s Tools menu.</li>
-          <li>Pick the skeletal mesh, adjust the bake settings, and bake.</li>
+          <li>
+            Open the <strong>Rope SDF Authoring</strong> tab from the editor’s Tools menu — double-clicking
+            a <code>URopeSDFData</code> asset opens the same tab.
+          </li>
+          <li>
+            Select (or create) the <code>URopeSDFData</code> asset in the panel’s asset picker, set its{' '}
+            <strong>Source Mesh</strong> in the embedded asset details, adjust the bake settings, and bake.
+          </li>
+          <li>
+            The bake writes into the asset in memory — press <strong>Save</strong> to commit it to disk.
+          </li>
           <li>
             Add a <code>URopeSDFProvider</code> to the character, assign the baked asset, and optionally
-            narrow <strong>Bone Filter</strong> to the bones you actually want wrappable.
+            set <strong>Bone Filter Mode</strong> to Include or Exclude and list the bones you actually
+            want wrappable in <strong>Bone Filter</strong> (the default mode, All, ignores the list).
           </li>
         </ol>
         <Figure
@@ -1233,14 +1260,19 @@ Rope.Ragdoll.Destroy   // destroy the target, to exercise the mid-wrap loss path
           columns={['Setting', 'Default', 'Effect']}
           rows={[
             ['Voxel Size', '2 cm', 'Sample spacing. Smaller sharpens the surface but costs memory and bake time.'],
-            ['Max Resolution', '48', 'Cap on samples per axis. A bone that would exceed it gets a coarser voxel size instead.'],
-            ['Precision', '16-bit', 'Distance quantization. 16-bit is 256× finer than 8-bit at double the size.'],
-            ['Narrow Band', '3 cm', 'Outward detection band. The rope starts reacting from this far out; ~2–3× the collision radius is stable. The inward band is auto-sized per bone.'],
-            ['Weight Threshold', '0.2', 'Minimum average skin weight for a triangle to be assigned to a bone.'],
-            ['Bounds Padding', '0 cm', 'Expand each bone’s triangle AABB before voxelizing.'],
+            ['Narrow Band (outward)', '3 cm', 'Outward detection band. The rope starts reacting from this far out; ~2–3× the collision radius is stable. The inward band is auto-sized per bone.'],
             ['Min Bone Girth', '8 cm', 'Bones thinner than this are not baked. Set it near the collision radius of the thinnest rope that will use the asset; 0 bakes everything.'],
+            ['Max Resolution', '48', 'Advanced. Cap on samples per axis. A bone that would exceed it gets a coarser voxel size instead.'],
+            ['Distance Precision', 'Standard (16-bit)', 'Advanced. Distance quantization. 16-bit is 256× finer than Low (8-bit) at double the size.'],
+            ['Weight Threshold', '0.2', 'Advanced. Minimum average skin weight for a triangle to be assigned to a bone.'],
+            ['Bounds Padding', '0 cm', 'Advanced. Expand each bone’s triangle AABB before voxelizing.'],
           ]}
         />
+        <p>
+          The rows marked <em>Advanced</em> sit inside the panel’s collapsed <strong>Advanced</strong>{' '}
+          expander. Each bake reports to the <strong>Dynamic Rope SDF</strong> message log — bones
+          coarsened to fit Max Resolution, and thin bones dropped by Min Bone Girth.
+        </p>
 
         <Callout type="info" title="Sizing the narrow band">
           Contact happens at the solver’s collision radius, so a narrow band of roughly 2–3× that radius
@@ -1323,8 +1355,9 @@ Rope.Ragdoll.Destroy   // destroy the target, to exercise the mid-wrap loss path
         />
 
         <p>
-          The SDF collider derives its surface velocity from the bone’s per-frame motion, so a swinging
-          limb sweeps the rope aside — something the analytic capsule provider does not do.
+          Like the analytic capsule collider, the SDF collider derives its surface velocity from the
+          bone’s per-frame motion, so a swinging limb sweeps the rope aside instead of ghosting through
+          it.
         </p>
       </>
     ),
@@ -1336,13 +1369,14 @@ Rope.Ragdoll.Destroy   // destroy the target, to exercise the mid-wrap loss path
       <>
         <h2>Gameplay Debugger</h2>
         <p>
-          The plugin registers two categories. Open the Gameplay Debugger (apostrophe by default) and
-          enable <strong>Rope</strong> or <strong>RopePerf</strong>. Both drop out of Shipping builds
-          automatically.
+          The plugin registers two categories. Open the Gameplay Debugger (apostrophe by default) —{' '}
+          <strong>Rope</strong> starts enabled; <strong>RopePerf</strong> starts off. Both drop out of
+          Shipping builds automatically.
         </p>
         <p>
-          <strong>Rope</strong> reports on one rope — the one on the debugger’s current target actor,
-          which it names at the head of its output (<code>Rope@BP_ThirdPersonCharacter_C_0</code>). So
+          <strong>Rope</strong> reports on the debugger’s current target actor — one block per rope
+          component on it — and names the target at the head of its output
+          (<code>Rope@BP_ThirdPersonCharacter_C_0</code>). So
           when you are reading the wrong rope, the target is what to change, and that is the engine’s own
           binding rather than anything the plugin adds: hold the apostrophe to pick the pawn you are
           looking at, or hold <strong>Shift + apostrophe</strong> to snap back to the local player. The
@@ -1375,7 +1409,8 @@ Rope.Ragdoll.Destroy   // destroy the target, to exercise the mid-wrap loss path
           <strong>RopePerf</strong> is the per-rope sweep rather than the detail view. Each rope reports{' '}
           <code>gpu</code>, <code>cpu</code>, <code>SLEEP</code> or <code>idle</code>, under a world
           summary counting how many ropes are on each, which is the fastest way to catch one that quietly
-          dropped to the CPU path.
+          dropped to the CPU path. It puts the same values as the <code>stat DynamicRope</code> group onto
+          the HUD — the stat group is the option when you want them in a profile capture instead.
         </p>
         <Figure
           src="media/Debugging.webp"
@@ -1389,8 +1424,9 @@ Rope.Ragdoll.Destroy   // destroy the target, to exercise the mid-wrap loss path
         <CodeBlock
           language="text"
           code={`r.DynamicRope.ForceCPUSolve 1        // force the CPU path (parity checks, GPU isolation)
-r.DynamicRope.Debug.LogSDFProjection 1  // log SDF surface projections
+r.DynamicRope.Debug.LogSDFProjection 1  // log SDF projection failures (2 adds successes)
 dr.Rope.LiftDebug 15                  // log tether numbers for each wrapped rope every 15 frames
+dr.Rope.FlightDebug 1                 // log per-frame Flight/Contacting capture diagnostics
 
 Rope.Preset.List / .Cycle / .Apply    // preset cycling (non-Shipping)
 Rope.Ragdoll / .Recover / .Destroy    // ragdoll response testing (non-Shipping)`}
@@ -1400,15 +1436,17 @@ Rope.Ragdoll / .Recover / .Destroy    // ragdoll response testing (non-Shipping)
           held: every N frames it logs each wrapped rope’s material length, leg limit, measured span,
           violation and tension. Use it when tuning the length constraint or diagnosing tether jitter —
           for example at low frame rates, where the fix is fixed-tick physics (see{' '}
-          <Link to="/docs/performance">Performance &amp; Budgeting</Link>). 0 turns it off, and like the
-          other commands it is compiled out of Shipping builds.
+          <Link to="/docs/performance">Performance &amp; Budgeting</Link>). 0 turns it off. The debug logs
+          and the <code>Rope.*</code> commands are compiled out of Shipping builds;{' '}
+          <code>r.DynamicRope.ForceCPUSolve</code> alone stays available everywhere.
         </p>
 
         <h2>Automation tests</h2>
         <p>
-          C++ automation tests cover the solver, wrap controller, SDF sampler, GPU solver, length
-          constraint, traction, wielder lifecycle and presets. Run them from{' '}
-          <strong>Tools → Session Frontend → Automation</strong>, filtering on <code>Rope.</code>.
+          C++ automation tests cover the solver, wielder lifecycle, flight contact, wrapping, collision,
+          traction, movement, pierce, presets, tip stabilizer, SDF sampler, GPU solver, ragdoll and more.
+          Run them from <strong>Tools → Session Frontend → Automation</strong>, filtering on{' '}
+          <code>DynamicRope.</code>.
         </p>
 
         <h2>Runtime introspection</h2>
@@ -1430,8 +1468,9 @@ Rope->GetSolverLODScale();`}
           signals, useful both as test scenes and as reference implementations:{' '}
           <code>ARopeDemoDoor</code>, <code>ARopeDemoElevator</code>, <code>ARopeDemoLever</code>,{' '}
           <code>ARopeDemoPressurePlate</code>, <code>ARopeDemoHelicopter</code>,{' '}
-          <code>ARopeDemoSnare</code>, <code>ARopeDemoRespawnVolume</code> and{' '}
-          <code>ARopeDemoPresetVolume</code>. Each exposes a Blueprint-assignable state delegate.
+          <code>ARopeDemoSnare</code>, <code>ARopeDemoBasketGoal</code>,{' '}
+          <code>ARopeDemoRespawnVolume</code> and <code>ARopeDemoPresetVolume</code>. Each exposes a
+          Blueprint-assignable state delegate.
         </p>
       </>
     ),
@@ -1463,7 +1502,7 @@ Rope->GetSolverLODScale();`}
             [
               <code key="d">ARopeController</code>,
               '(auto-spawned actor)',
-              'Hosts the static world collider provider — exactly one per world. Subclass it to change budgets, or clear the class in project settings to place your own.',
+              'Hosts the static world collider provider — exactly one per world. Collider budgets live in project settings; subclass it for per-provider wiring such as IgnoredComponents, or clear the class in project settings to place your own.',
             ],
           ]}
         />
@@ -1474,6 +1513,7 @@ Rope->GetSolverLODScale();`}
           rows={[
             [<code key="a">URopeBoneCapsuleProvider</code>, 'A skeletal actor', 'One analytic capsule per listed bone, rebuilt each frame.'],
             [<code key="b">URopeSDFProvider</code>, 'A skeletal actor', 'Serves colliders sampling a baked URopeSDFData volume.'],
+            [<code key="e">URopeSkeletalColliderProvider</code>, 'A skeletal actor', 'The abstract base both providers above derive from — subclass it to serve custom skeletal colliders.'],
             [<code key="c">URopeWrapTargetComponent</code>, 'A static prop', 'Makes a pole, beam or hook a genuine wrap target with an axis and radius.'],
             [<code key="d">URopeStaticBodyProvider</code>, '(on ARopeController)', 'Sweeps world static and dynamic bodies into boxes, capsules and convex hulls.'],
           ]}
@@ -1489,7 +1529,9 @@ Rope->GetSolverLODScale();`}
             [<code key="d">UAnimNotifyState_RopePull</code>, 'An animation-scoped pull window.'],
             [<code key="e">URopeAimWidget</code>, 'Aim crosshair and wrappable-bone highlight ring. Restyle by subclassing in a WBP.'],
             [<code key="f">URopePullGaugeWidget</code>, 'Pull arming/engagement ring.'],
-            [<Names key="g">URopePluginInfoHUD / URopePluginInfoWidget</Names>, 'In-game key guide, capabilities and limitations panels for demo levels.'],
+            [<Names key="h">URopeReelGaugeComponent / URopeReelGaugeWidget</Names>, 'World-space reel gauge. Restyle by subclassing the widget.'],
+            [<Names key="i">URopeWrapCameraComponent / URopeWrapCameraDirectorComponent / ARopeWrapCameraRig</Names>, 'Opt-in wrap camera: the director cuts to a rig while a wrap holds, with OnBegin/OnEnd events.'],
+            [<Names key="g">ARopePluginInfoHUD / URopePluginInfoWidget</Names>, 'In-game key guide, capabilities and limitations panels for demo levels.'],
           ]}
         />
 
@@ -1538,6 +1580,9 @@ Rope->GetSolverLODScale();`}
             ['Material', 'Engine default', 'Replace at runtime with SetMaterial(0, M), not by direct assignment.'],
             ['Collide With Owner', 'Off', 'Turn on when the rope is mounted on a prop it must collide with.'],
             ['Use World Distance Field', 'On', 'Global-distance-field push-out from static world geometry (GPU path).'],
+            ['Taut Presentation', 'On', 'Render-only shaping of a taut hold: the free span straightens toward its chord and a short thrum plays when the chain snaps taut. Simulation and tension are unaffected.'],
+            ['Taut Straightening', '1.0', 'How far the taut free span straightens — 0 as solved, 1 dead straight.'],
+            ['Taut Thrum Amplitude', '2.5 cm', 'Peak displacement of the decaying thrum at the taut snap. 0 keeps the straightening without the thrum.'],
           ]}
         />
 
@@ -1552,9 +1597,11 @@ Rope->GetSolverLODScale();`}
             ['Friction', '0.5', 'Tangential friction against colliders, measured relative to the surface velocity.'],
             ['Tip Grip Falloff', '1.0', 'Scales friction toward the free end.'],
             ['Collision Radius (0 = Auto)', '0', 'Solver collision radius; auto derives from the render radius.'],
+            ['Sweep Step', '2 cm', 'Sample spacing of the anti-tunnelling collision sweep along a node’s substep travel. Lower resists tunnelling better; move it together with Max Sweep Samples.'],
+            ['Max Sweep Samples', '16', 'Cap on sweep samples per segment. Raise it when lowering Sweep Step alone stops helping.'],
             ['Gravity', '(0, 0, -980)', 'Per-rope gravity.'],
             ['Motion Damping', '0.02', 'Velocity damping per substep.'],
-            ['Allow Sleep', 'On', 'Skip solving a settled Free rope.'],
+            ['Allow Sleep', 'On', 'Skip solving a settled rope. A Free rope stops entirely; a Wrapped one keeps its hold logic and pauses only the free span’s solve.'],
             ['Sleep Speed Threshold', '3.0', 'Speed below which a rope counts as settled.'],
             ['Sleep Delay', '0.5 s', 'How long it must stay settled before sleeping.'],
             ['Enable Distance LOD', 'On', 'Scale iterations down with camera distance.'],
@@ -1566,14 +1613,15 @@ Rope->GetSolverLODScale();`}
         <h2>Throw — <code>FRopeThrowParams</code></h2>
         <PropTable
           rows={[
-            ['Frame Mode', 'Owner', 'Where the throw direction comes from — Owner, OwnerCamera or Custom.'],
+            ['Frame Mode', 'Owner', 'Where the throw direction comes from — World, Owner, OwnerCamera, Socket or Custom.'],
             ['Swing Plane', 'Aim And Frame Up', 'The plane the whip swings in.'],
             ['Throw Speed', '1000 cm/s', 'Initial tip speed.'],
             ['Return If No Contact', '0 s (off)', 'Auto-return the rope if flight makes no contact within this time.'],
             ['Tip Velocity Boost', '1.0', 'Extra speed weighting toward the tip.'],
             ['Motion Inheritance', '5.0', 'How much owner and hand-animation velocity is inherited.'],
-            ['Guided Throw Arc Height Ratio', '0.25', 'Guaranteed mode: arc height of the guided path.'],
+            ['Arc Height', '0.25', 'Guaranteed mode: apex height of the guided arc as a fraction of the hand-to-target distance. 0 flies straight; capped at 0.5.'],
             ['Custom Forward / Up / Right', 'Axis defaults', 'Used when Frame Mode is Custom.'],
+            ['Custom Plane Normal', '(0, 1, 0)', 'Used when Swing Plane is Custom Normal.'],
           ]}
         />
 
@@ -1583,6 +1631,10 @@ Rope->GetSolverLODScale();`}
           rows={[
             ['Guided Length', '0.65', 'The fraction of the rope the guide curve drives.'],
             ['Sweep Angle', '180°', 'The angle swept from the starting angle round to the aim direction.'],
+            ['Initial Curve', '0.12', 'Full Simulation only: initial one-sided C-shape amplitude as a fraction of the guide length.'],
+            ['Straighten At', '0.50', 'Full Simulation only: normalized whip time at which the initial C shape becomes exactly straight.'],
+            ['Tip Physics Blend', '0.25', 'Rope-length fraction that crossfades from the guide into the solver-owned tail.'],
+            ['Skip Collision', 'On', 'Aim-hit flight only: keep the distance/bend/damping solves but disable collider push-out. Contact detection still runs.'],
           ]}
         />
 
@@ -1590,18 +1642,21 @@ Rope->GetSolverLODScale();`}
         <p>Capture thresholds and wrap-path construction. Not used in Guaranteed mode.</p>
         <PropTable
           rows={[
-            ['Enable Multi Bone Wrapping', 'On', 'Allow a wrap spanning several bones (both legs, for example).'],
-            ['Contact Query Radius (0 = Auto)', '0', 'Detection radius; auto derives from the render radius × 1.5.'],
-            ['Min Latch Nodes', '1', 'Nodes that must be in sustained contact with one bone to capture.'],
-            ['Wrap Decision Time', '0.016 s', 'How long that contact must persist.'],
-            ['Predictive Contact Frames', '1.0', 'How far ahead node motion is extrapolated for predicted contacts.'],
-            ['Wrapping Axis Source', 'Bone-Centered Guide Plane', 'How the wrap axis is derived.'],
-            ['Wrapping Motion Duration', '0.20 s', 'How long the wrap front takes to travel the path.'],
-            ['Wrapping Angular Speed', '1100 °/s', 'The front’s angular rate along the path.'],
+            ['Enable Multi Bone Wrapping', 'On', 'Allow a wrap spanning several bones (both legs, for example). Blueprint-only — not in the details panel.'],
+            ['Contact Query Radius (0 = Auto)', '0', 'Detection radius; auto derives from the render radius × 1.5. Blueprint-only.'],
+            ['Min Latch Nodes', '1', 'Real contacts on one bone needed to seed a wrap; the commit follows as soon as the seed is valid, with no time gate. Blueprint-only.'],
+            ['Predictive Contact Frames', '1.0', 'How far ahead node motion is extrapolated for predicted contacts. Blueprint-only.'],
+            ['Sweep Step', '2 cm', 'Contact-side anti-tunnelling sweep spacing during Flight.'],
+            ['Max Sweep Samples', '16', 'Cap on contact sweep samples per node.'],
+            ['Axis Source', 'Bone-Centered Guide Plane', 'Where the wrap axis and its measurement frame come from.'],
+            ['Min Wrap Duration', '0.20 s', 'Floor on the Wrapping phase — even when the front arrives early, the commit waits until this has elapsed.'],
+            ['Wrap Speed', '1100 °/s', 'The front’s angular rate along the path.'],
             ['Max Wrap Seeds', '1', 'Concurrent wrap seeds considered.'],
-            ['Failed Wrap Min Angle', '120°', 'Below this accumulated angle a wrap attempt counts as failed.'],
-            ['Commit Min Wrap Angle', '0° (off)', 'Quality gate: reject a commit below this wrapped angle.'],
-            ['Commit Min Wrap Coverage', '0° (off)', 'Quality gate: reject a commit below this angular coverage.'],
+            ['Max Gap Bridge', '0 cm (off)', 'Bridge gaps in the wrap path over open space — what makes a forked target (two legs) wrappable.'],
+            ['Max Wrap Angle', '0° (off)', 'Cap on the total wrapped angle. Composite helix paths are exempt.'],
+            ['Min Angle On Path Failure', '120°', 'A wrap whose path build failed is released below this angle instead of committed.'],
+            ['Min Commit Angle', '0° (off)', 'Quality gate: reject a commit below this wrapped angle.'],
+            ['Min Commit Coverage', '0° (off)', 'Quality gate: reject a commit below this angular coverage.'],
           ]}
         />
 
@@ -1613,22 +1668,22 @@ Rope->GetSolverLODScale();`}
         <PropTable
           rows={[
             ['Enforce Rope Length', 'On', 'The wielder cannot move past the rope’s length.'],
-            ['Enforce Rope Length (Target)', 'On', 'Neither can the wrapped target.'],
+            ['Enforce Rope Length (Target)', 'On', 'Neither can a CMC-driven kinematic target on an anchored rope.'],
             ['Rope Elasticity', '0.0', 'Length-constraint compliance. 0 is rigid.'],
-            ['Length Constraint Activation Slop', '0.5 cm', 'Slack before the boundary engages.'],
             ['Taut Sensitivity', '0.5', 'One knob [0..1] driving both the slack ratio and the max allowed sag.'],
-            ['Pull Strength', '100000', 'The constant active-pull force.'],
+            ['Pull Strength', '100000', 'Tension cap on the active pull. With Pull Speed it gives mass dependence: a light target reaches the target speed, one too heavy for the cap lags behind.'],
             ['Pull Requires Taut', 'On', 'Gate active pull on the rope being taut.'],
-            ['Active Pull Taut Tension', '0 (off)', 'Additionally require this much load before pull engages.'],
+            ['Pull Load Threshold', '0 (off)', 'Additionally require this much load before pull engages.'],
             ['Pull Corner Angle', '30°', 'Bend angle that counts as a corner when deriving the pull direction.'],
-            ['Active Pull Max Linear / Angular Speed', '300 cm/s / 720 °/s', 'Caps on driving a physics body.'],
+            ['Pull Speed / Pull Spin Limit', '300 cm/s / 720 °/s', 'Target speed the pull drives a physics body toward, and the spin cap on it.'],
             ['Tether Speed Limit', '1500 cm/s', 'Cap on tether-driven motion.'],
             ['Tether Recovery Speed', '150 cm/s', 'Cap on the positional-bias recovery rate.'],
+            ['Tether Settle Time', '0.08 s', 'Time constant for recovering overshoot on an inextensible tether. Smaller is firmer.'],
             ['Tether Sideways Damping', '0.3', 'Damping perpendicular to the rope.'],
-            ['Max Tether Tension', '500000', 'Ceiling on the tether impulse.'],
+            ['Tether Tension Limit', '500000', 'Force cap in elastic mode; the debugger’s overload baseline on an inextensible rope.'],
             ['Ground Brace Factor', '1.5', 'How much a grounded wielder resists being dragged.'],
             ['Release At Tension', '0 (off)', 'Auto-release above this load.'],
-            ['Tension Release Time', '0.05 s', 'How long it must stay above.'],
+            ['Release Delay', '0.05 s', 'How long it must stay above.'],
             ['Release At Overstretch', '0 cm (off)', 'Auto-release when overstretched by this much.'],
           ]}
         />
@@ -1641,10 +1696,11 @@ Rope->GetSolverLODScale();`}
             ['Static Body Max Colliders Per Rope', '32', 'Per-rope solve budget; excess dropped furthest-first.'],
             ['Static Body Max Convex Planes', '32', 'Convexes above this fall back to an OBB.'],
             ['Include World Dynamic', 'On', 'Collect WorldDynamic bodies too.'],
+            ['Include Physics Bodies', 'Off', 'Also collect simulating physics props as one-way push-out colliders.'],
             ['Aim Hud Widget Class', 'URopeAimWidget', 'Aim HUD. Point at a WBP subclass to restyle; clear to disable.'],
             ['Pull Gauge Widget Class', 'URopePullGaugeWidget', 'Pull gauge. Same pattern.'],
             ['Demo Presets', 'Empty', 'Presets for the non-Shipping Rope.Preset console commands.'],
-            ['Write Velocity', 'Off', 'Whether the rope tube writes to the velocity buffer. Off avoids motion-blur smearing; on trades that against TSR ghosting.'],
+            ['Write Velocity', 'On', 'Whether the rope tube writes motion vectors. On gives correct motion blur and avoids TSR/TAA ghosting; off excludes the rope from motion blur.'],
           ]}
         />
       </>
@@ -1699,7 +1755,7 @@ Rope->GetSolverLODScale();`}
             [<code key="c">Enter Loaded</code>, 'Guaranteed mode: ready the tip in hand. Valid from Free or Loaded.'],
             [<code key="d">Release Wrap</code>, 'Manual release.'],
             [<code key="e">Cut Rope</code>, 'Same flow, reported as ERopeReleaseReason::Cut so the game can react differently.'],
-            [<code key="f">Set Active Pull</code>, 'Constant pull force while taut; 0 stops. bIgnoreTautGate bypasses the gate for this call.'],
+            [<code key="f">Set Active Pull</code>, 'Pull under this tension cap while taut; 0 stops. bIgnoreTautGate bypasses the gate for this call.'],
             [<Names key="g">Set Rope Length / Set Reel Rate</Names>, 'Immediate and held-input reeling.'],
             [<code key="h">Apply Preset</code>, 'Returns false outside Free/Loaded.'],
             [<Names key="i">Set / Toggle Show Rope When Loaded</Names>, 'Guaranteed-mode presentation switch.'],
@@ -1723,6 +1779,7 @@ Rope->GetSolverLODScale();`}
             [<Names key="k">Get Segment Tension / Get Max Tension</Names>, 'Visual solver diagnostics — not gameplay load.'],
             [<Names key="l">Is Sleeping / Get Solver LOD Scale</Names>, 'Scaling state.'],
             [<code key="m">Constrain Wielder Location</code>, 'Project a proposed move into the hard length boundary.'],
+            [<Names key="n">Get Whip Elapsed / Get Reel Rate / Get Tip Mesh Component / Is Show Rope When Loaded / Is Wielder Physically Simulated</Names>, 'Flight timing, reel state and presentation queries.'],
           ]}
         />
 
@@ -1731,21 +1788,41 @@ Rope->GetSolverLODScale();`}
           columns={['Node', 'Notes']}
           rows={[
             [<Names key="a">Throw / Throw Now / Throw In Direction</Names>, 'Throw with the montage, immediately, or toward an explicit direction.'],
-            [<code key="b">Toggle Throw</code>, 'What the throw input does when Throw Toggles Hold is on (the default).'],
+            [<code key="b">Toggle Throw</code>, 'What the throw input does when Throw Toggles Hold is on (the default) and no separate Release Action is bound.'],
             [<Names key="c">Start Pull / Stop Pull</Names>, 'Arm and disarm. Engagement waits for Pull Engage Tension.'],
             [<Names key="d">Start Pull Now / Stop Pull Now</Names>, 'Skip the arming stage.'],
             [<Names key="e">Start Reel In / Start Reel Out / Stop Reel</Names>, 'Held-input reeling at the rope’s Reel Speed.'],
             [<Names key="f">Release / Cut</Names>, 'Forwarded to the rope.'],
             [<Names key="g">Play Throw Montage / Play Pull Montage</Names>, 'Manual montage triggers.'],
-            [<code key="h">Build Throw Context</code>, 'Blueprint-overridable context construction from an aim direction.'],
+            [<code key="h">Build Throw Context</code>, 'Context construction from an aim direction. Callable from Blueprint; overridable from a C++ subclass.'],
             [<Names key="i">Uses Aim Ray / Is Aim Active / Uses Locked Preview / Is Pull Armed / Is Pull Engaged / Get Pull Engage Progress</Names>, 'State queries for UI.'],
+            [<Names key="j">Get Rope / Bind Input</Names>, 'The bound rope, and manual Enhanced Input binding when Auto Bind Input is off.'],
+            [<Names key="k">Set / Is Rope Input Suppressed</Names>, 'Mute the wielder’s rope input handling and read it back.'],
+            [<Names key="l">Set / Is Throw Preview Enabled</Names>, 'Toggle the throw preview at runtime.'],
+            [<Names key="m">Is Hanging On Rope / Get Hang Anim Sample / Is Hang Socket Swapped</Names>, 'Hang-state queries for animation blueprints.'],
+            [<code key="n">Get Aim Hud Sample</code>, 'Everything the aim HUD shows this frame, for a custom widget.'],
+          ]}
+        />
+
+        <h2>Events on URopeWielderComponent</h2>
+        <PropTable
+          columns={['Event', 'Payload', 'When']}
+          rows={[
+            [<code key="a">On Thrown</code>, '—', 'The wielder’s throw actually fired.'],
+            [<code key="b">On Throw Rejected</code>, 'ERopeThrowRejectReason', 'A throw attempt was refused; the reason says why.'],
+            [<code key="c">On Aim Target Changed</code>, 'USceneComponent*, FName Bone', 'The aim settled on a new wrappable target.'],
+            [<code key="d">On Aim Target Lost</code>, '—', 'No wrappable target under the aim any more.'],
+            [<code key="e">On Pull Armed Changed</code>, 'bool', 'Pull arming toggled.'],
+            [<code key="f">On Pull Engaged Changed</code>, 'bool, float Tension', 'Pull engagement toggled, with the tension at the flip.'],
           ]}
         />
 
         <h2>World-wide signals (C++)</h2>
         <p>
           For systems that react to <em>any</em> rope — HUDs, AI, demo props — subscribe on the subsystem
-          instead of on each component. These are native multicast delegates, not dynamic ones.
+          instead of on each component. These are native multicast delegates, not dynamic ones. Unlike the
+          per-rope <code>OnRopeReleased</code>, <code>OnAnyRopeReleased</code> fires only for committed
+          wraps — pre-wrap aborts stay per-instance.
         </p>
         <CodeBlock
           language="cpp"
@@ -1770,7 +1847,9 @@ Rope->GetSolverLODScale();`}
     body: (
       <>
         <p>
-          Subclass <code>URopeComponent</code> and override the hooks below. All of them run on the game
+          Add <code>"DynamicRope"</code> to your module’s <code>PublicDependencyModuleNames</code> (and{' '}
+          <code>"DynamicRopeShaders"</code> if you touch the GPU solver or tube-builder types), then
+          subclass <code>URopeComponent</code> and override the hooks below. All of them run on the game
           thread on cold paths — per frame at most, usually per transition. The parallel Solve stage has no
           hooks by design: the node-level hot loops are the POD / GPU parity reference and are not virtual
           extension points.
@@ -1808,6 +1887,12 @@ Rope->GetSolverLODScale();`}
           ]}
         />
 
+        <p>
+          The wielder has hooks of its own: subclass <code>URopeWielderComponent</code> and override{' '}
+          <code>CanThrow()</code> to gate throws on a game rule, and <code>NotifyThrown()</code> /{' '}
+          <code>NotifyThrowRejected(Reason)</code> to react natively without binding to the delegates.
+        </p>
+
         <h2>Presentation hooks</h2>
         <PropTable
           columns={['Hook', 'Called', 'Notes']}
@@ -1822,9 +1907,12 @@ Rope->GetSolverLODScale();`}
 
         <h2>Writing a custom collider</h2>
         <p>
-          Implement <code>IRopeCollider::Query()</code> and serve it from an{' '}
-          <code>IRopeColliderProvider</code>. <code>FRopeContact</code> is a{' '}
-          <strong>frozen contract</strong> — every collider must obey it exactly:
+          Implement <code>IRopeCollider</code> — its two pure virtuals are <code>Query()</code> and{' '}
+          <code>GetWorldBounds()</code> — and serve it from an <code>IRopeColliderProvider</code> via{' '}
+          <code>GatherColliders()</code>. A provider that sweeps world geometry must also fill{' '}
+          <code>ColliderSourceActors</code>, or its colliders will push its own rope around.{' '}
+          <code>FRopeContact</code> is a <strong>frozen contract</strong> — every collider must obey it
+          exactly:
         </p>
         <ul>
           <li>
@@ -1867,9 +1955,9 @@ Rope->GetSolverLODScale();`}
       <>
         <h2>Does it work in multiplayer?</h2>
         <p>
-          No. The plugin does not replicate rope or wrap state, and on a replicated pawn the wielder
-          deliberately does nothing for simulated proxies rather than projecting a locally guessed rope
-          that would fight network smoothing. A remote client will not see a correct rope. See{' '}
+          No. The plugin does not replicate rope or wrap state, and on a replicated pawn the wielder’s
+          length constraint deliberately skips simulated proxies rather than projecting a locally guessed
+          rope that would fight network smoothing. A remote client will not see a correct rope. See{' '}
           <Link to="/docs/requirements">Requirements &amp; Compatibility</Link>.
         </p>
 
@@ -1904,10 +1992,11 @@ Rope->GetSolverLODScale();`}
 
         <h2>The rope wraps but does not follow animation.</h2>
         <p>
-          The wrap must actually commit — enough nodes in sustained contact with one bone for the decision
-          time. If it releases immediately, lower <code>MinLatchNodes</code> or raise{' '}
-          <code>WrapDecisionTime</code>, and check whether <code>CommitMinWrapAngleDeg</code> /{' '}
-          <code>CommitMinWrapCoverageDeg</code> are rejecting the commit. Both are reported on the wrap
+          The wrap must actually commit — enough nodes in real contact with one bone to seed it. If it
+          releases immediately, lower <code>MinLatchNodes</code>, tighten the contact{' '}
+          <strong>Sweep Step</strong> (the anti-tunnelling value) or raise{' '}
+          <strong>Predictive Contact Frames</strong>, and check whether <strong>Min Commit Angle</strong> /{' '}
+          <strong>Min Commit Coverage</strong> are rejecting the commit. Both are reported on the wrap
           event, so log them from a real throw before tuning.
         </p>
 
@@ -1915,19 +2004,22 @@ Rope->GetSolverLODScale();`}
         <p>
           Active pull is gated on the rope being taut. Verify with <code>IsPullTaut()</code>, then either
           reel in, lower <strong>Taut Sensitivity</strong>, or turn off{' '}
-          <code>bActivePullRequiresTaut</code>. If the target is a character, remember movement divides the
-          force by mass and fights ground friction — the default <code>PullForce</code> of 100000 is the
-          right order of magnitude, not an upper bound. If the target is anchored or very heavy, the pull
-          intentionally reverses into climb-in and drags the wielder instead.
+          <code>bActivePullRequiresTaut</code>. If the target is a physics body, remember the pull drives
+          it toward <strong>Pull Speed</strong> under the <strong>Pull Strength</strong> tension cap — a
+          Pull Speed of 0 does nothing at all, and a target too heavy for the cap lags behind, so raise
+          Pull Strength for heavy targets and Pull Speed for a faster pull. If the target is anchored or
+          very heavy, the pull intentionally reverses into climb-in and drags the wielder instead.
         </p>
 
         <h2>The rope quietly got slow.</h2>
         <p>
           It probably dropped to the CPU path. Enable the <strong>RopePerf</strong> Gameplay Debugger
-          category — it marks each rope <code>gpu</code> or <code>cpu</code>, so a stray <code>cpu</code>
-          row is the answer. Switch to the <strong>Rope</strong> category if you then need to know which
-          kind of frame it was. The usual causes are a node count or ring count above 512, or no
-          renderable RHI.
+          category — it marks each rope <code>gpu</code> or <code>cpu</code> (a settled rope reads{' '}
+          <code>SLEEP</code>, an override-only frame <code>idle</code>), so a stray <code>cpu</code> row is
+          the answer. Switch to the <strong>Rope</strong> category if you then need to know which kind of
+          frame it was. The usual causes are no renderable RHI, a feature level below SM5, or{' '}
+          <code>r.DynamicRope.ForceCPUSolve</code> left at 1 — node and ring counts can no longer exceed
+          the 512 cap; they are clamped at init.
         </p>
 
         <h2>The rope jitters and cannot reel a ragdolled target in.</h2>
@@ -1943,17 +2035,19 @@ Rope->GetSolverLODScale();`}
 
         <h2>Performance dips with many ropes.</h2>
         <p>
-          Ropes solve in parallel and share one collider gather per frame. Keep node and ring counts within
-          the GPU budget, leave sleep and distance LOD on, and lower{' '}
-          <strong>Static Body Max Colliders Per Rope</strong> in dense scenes — the GPU kernel loops
-          colliders per node per substep, so that number multiplies directly into cost.
+          Ropes solve in parallel and share one collider gather per frame. Keep node counts modest, leave
+          sleep and distance LOD on, and lower <strong>Static Body Max Colliders Per Rope</strong> in dense
+          scenes — the GPU kernel loops colliders per node per substep, so that number multiplies directly
+          into cost. Skeleton colliders always run and ignore that budget, so a dense-skeleton scene needs
+          fewer provider bones instead.
         </p>
 
         <h2>The rope smears when it moves fast.</h2>
         <p>
-          That is per-object motion blur. <strong>Write Velocity</strong> is off by default to avoid it; if
-          you instead see mild ghosting under TSR with a static camera and a fast rope, turn it on and
-          compare. It is read when the scene proxy is created, so restart PIE after changing it.
+          That is per-object motion blur. <strong>Write Velocity</strong> is on by default so TSR/TAA get
+          correct motion vectors; turning it off excludes the rope from motion blur, at the price of mild
+          ghosting under TSR with a fast rope and a static camera. It is read when the scene proxy is
+          created, so restart PIE after changing it.
         </p>
 
         <h2>Does it work in packaged and dedicated-server builds?</h2>

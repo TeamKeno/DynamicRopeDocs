@@ -245,15 +245,13 @@ export const SHOWCASE = [
         eyebrow: 'Performance',
         heading: 'The whole simulation runs on the GPU',
         body:
-          'Solving, contact detection and tube building all happen on the graphics card, and the rope state stays there between frames — so your ropes are not spending game-thread time. Cooking, servers, -nullrhi and ropes over the node cap fall back to the CPU on their own.',
-        // The node cap belongs in that list. It is the only CPU case that can
-        // happen during normal play, and leaving it out let the sentence read
-        // as "the CPU path is for cooks and servers" when a big enough rope
-        // takes it too. "The fallback needs no configuration" then said "on
-        // their own" a second time, so the slot went to the force-CPU toggle.
+          'Solving, contact detection and tube building all happen on the graphics card, and the rope state stays there between frames — so your ropes are not spending game-thread time. Cooking, servers and -nullrhi fall back to the CPU on their own.',
+        // The node cap is deliberately NOT in that list: InitRope clamps the
+        // node count to the GPU solver's cap, so an over-cap rope cannot exist
+        // at runtime and never triggers a fallback.
         points: [
           'XPBD solver and tube builder on RDG compute',
-          'One console command forces the CPU path for comparison',
+          'One console variable forces the CPU path for comparison',
         ],
         // No counter in frame, deliberately. The block's copy avoids speed
         // claims because none have been measured, and an fps readout in the

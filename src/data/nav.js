@@ -7,7 +7,7 @@ export const PLUGIN = {
   engineVersions: ['5.5', '5.6', '5.7', '5.8'],
   platforms: 'Windows (Win64)',
   author: 'Team Keno',
-  fabUrl: '#', // TODO: Fab listing URL
+  fabUrl: 'https://www.fab.com/listings/92050cef-9b09-4738-ab4a-e77137faca0c',
   supportEmail: 'teamkeno0824@gmail.com',
 }
 
